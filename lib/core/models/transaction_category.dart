@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:cotrack/core/models/transaction_type.dart';
 
 class TransactionCategory {
-  final String id;
+  final int id;
   final String name;
   final String description;
   final TransactionType transactionType;
@@ -16,7 +16,7 @@ class TransactionCategory {
   });
 
   TransactionCategory copyWith({
-    String? id,
+    int? id,
     String? name,
     String? description,
     TransactionType? transactionType,

@@ -3,11 +3,15 @@ import 'package:cotrack/core/repo/repo.dart';
 
 class TransactionCategoryService {
   final TransactionCategoryRepository _transactionCategoryRepository;
+  static List<TransactionCategory> transactionCategories = [];
 
   TransactionCategoryService(this._transactionCategoryRepository);
 
   Future<List<TransactionCategory>> getTransactionCategories() async {
-    return await _transactionCategoryRepository.getAllTransactionCategories();
+    var result =
+        await _transactionCategoryRepository.getAllTransactionCategories();
+    transactionCategories = result;
+    return result;
   }
 
   Future<TransactionCategory> getTransactionCategoryById(String id) async {

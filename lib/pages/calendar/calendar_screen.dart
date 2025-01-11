@@ -1,8 +1,10 @@
 import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:calendar_view/calendar_view.dart';
+import 'package:cotrack/pages/calendar/transaction_modal_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:cotrack/themes/themes.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 const List<String> months = [
   "Jan",
@@ -31,7 +33,7 @@ class CalendarScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return CupertinoScaffold(
         body: MonthView(
       controller: eventController,
       key: monthState,
@@ -55,8 +57,10 @@ class CalendarScreen extends StatelessWidget {
               style: TextStyle(
                   color: isInMonth
                       ? Theme.of(context).colorScheme.onSurface
-                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: .3)
-                          )),
+                      : Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: .3))),
         );
       },
       headerStringBuilder: (date, {secondaryDate}) =>
@@ -103,8 +107,8 @@ class CalendarScreen extends StatelessWidget {
         //     .toString()
         //     .substring(WeekDays.values[day].toString().indexOf('.') + 1)),
       ),
-      borderSize: 1,
-      borderColor: yColors.background3,
+      borderSize: 0,
+      borderColor: yColors.background,
       showWeekends: true,
       minMonth: DateTime(1990),
       maxMonth: DateTime(2050),
@@ -114,6 +118,13 @@ class CalendarScreen extends StatelessWidget {
       onCellTap: (events, date) {
         // Implement callback when user taps on a cell.
         print(date);
+
+        showCupertinoModalBottomSheet(
+            expand: true,
+            isDismissible: false,
+            context: context,
+            backgroundColor: Colors.transparent,
+            builder: (context) => TransactionModelScreen());
       },
       startDay: WeekDays.sunday, // To change the first day of the week.
       // This callback will only work if cellBuilder is null.

@@ -1,5 +1,6 @@
 import 'package:cotrack/themes/themes.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -11,13 +12,21 @@ abstract final class AppTheme {
       interactionEffects: true,
       tintedDisabledControls: true,
       useM2StyleDividerInM3: true,
+      inputDecoratorSchemeColor: SchemeColor.primary,
       inputDecoratorIsFilled: true,
-      inputDecoratorBorderType: FlexInputBorderType.outline,
+      inputDecoratorIsDense: true,
+      inputDecoratorBackgroundAlpha: 10,
+      inputDecoratorBorderSchemeColor: SchemeColor.primary,
+      inputDecoratorRadius: 10.0,
+      inputDecoratorUnfocusedHasBorder: false,
+      inputDecoratorFocusedBorderWidth: 1.0,
+      inputDecoratorPrefixIconSchemeColor: SchemeColor.onPrimaryFixedVariant,
       alignedDropdown: true,
       navigationRailUseIndicator: true,
       navigationRailLabelType: NavigationRailLabelType.all,
     ),
     visualDensity: FlexColorScheme.comfortablePlatformDensity,
+    cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),
   );
   // The defined dark theme.
   static ThemeData dark = FlexThemeData.dark(
@@ -27,13 +36,21 @@ abstract final class AppTheme {
       tintedDisabledControls: true,
       blendOnColors: true,
       useM2StyleDividerInM3: true,
+      inputDecoratorSchemeColor: SchemeColor.primary,
       inputDecoratorIsFilled: true,
-      inputDecoratorBorderType: FlexInputBorderType.outline,
+      inputDecoratorIsDense: true,
+      inputDecoratorBackgroundAlpha: 10,
+      inputDecoratorBorderSchemeColor: SchemeColor.primary,
+      inputDecoratorRadius: 10.0,
+      inputDecoratorUnfocusedHasBorder: false,
+      inputDecoratorFocusedBorderWidth: 1.0,
+      inputDecoratorPrefixIconSchemeColor: SchemeColor.primaryFixed,
       alignedDropdown: true,
       navigationRailUseIndicator: true,
       navigationRailLabelType: NavigationRailLabelType.all,
     ),
     visualDensity: FlexColorScheme.comfortablePlatformDensity,
+    cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),
   );
 }
 
