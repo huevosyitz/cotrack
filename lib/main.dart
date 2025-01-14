@@ -30,7 +30,7 @@ Future<void> main() async {
 
   final queryClient = QueryClient(
       defaultQueryOptions: DefaultQueryOptions(
-    cacheDuration: const Duration(minutes: 15),
+    cacheDuration: const Duration(days: 1),
   ));
 
   runApp(GlobalLoaderOverlay(

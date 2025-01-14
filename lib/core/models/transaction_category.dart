@@ -5,13 +5,11 @@ import 'package:cotrack/core/models/transaction_type.dart';
 class TransactionCategory {
   final int id;
   final String name;
-  final String description;
   final TransactionType transactionType;
 
   TransactionCategory({
     required this.id,
     required this.name,
-    required this.description,
     required this.transactionType,
   });
 
@@ -24,7 +22,6 @@ class TransactionCategory {
     return TransactionCategory(
       id: id ?? this.id,
       name: name ?? this.name,
-      description: description ?? this.description,
       transactionType: transactionType ?? this.transactionType,
     );
   }
@@ -33,7 +30,6 @@ class TransactionCategory {
     return {
       'id': id,
       'name': name,
-      'description': description,
       'transactionType': transactionType.name,
     };
   }
@@ -42,9 +38,8 @@ class TransactionCategory {
     return TransactionCategory(
       id: map['id'] ?? '',
       name: map['name'] ?? '',
-      description: map['description'] ?? '',
       transactionType: TransactionType.values
-          .firstWhere((e) => e.toString() == map['transactionType']),
+          .firstWhere((e) => e.name == map['transactionType']),
     );
   }
 
@@ -55,7 +50,7 @@ class TransactionCategory {
 
   @override
   String toString() {
-    return 'TransactionCategory(id: $id, name: $name, description: $description, transactionType: $transactionType)';
+    return 'TransactionCategory(id: $id, name: $name, transactionType: $transactionType)';
   }
 
   @override
@@ -65,15 +60,11 @@ class TransactionCategory {
     return other is TransactionCategory &&
         other.id == id &&
         other.name == name &&
-        other.description == description &&
         other.transactionType == transactionType;
   }
 
   @override
   int get hashCode {
-    return id.hashCode ^
-        name.hashCode ^
-        description.hashCode ^
-        transactionType.hashCode;
+    return id.hashCode ^ name.hashCode ^ transactionType.hashCode;
   }
 }
