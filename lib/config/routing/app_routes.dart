@@ -15,6 +15,7 @@ class AppRoutes {
   static const stats = 'stats';
   static const accounts = 'accounts';
   static const profile = 'profile';
+  static const settings = 'settings';
   static const auth = 'auth';
   static const login = 'login';
   static const logout = 'logout';
@@ -148,9 +149,9 @@ final appRouter = GoRouter(
           ]),
           StatefulShellBranch(routes: [
             GoRoute(
-              name: AppRoutes.profile,
-              path: '/profile',
-              builder: (context, state) => const ProfileScreen(),
+              name: AppRoutes.settings,
+              path: '/settings',
+              builder: (context, state) => const SettingsScreen(),
             ),
           ]),
         ])

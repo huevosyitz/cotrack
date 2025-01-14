@@ -43,8 +43,8 @@ class AppShell extends WatchingWidget {
                   label: 'Accounts',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(yIcons.profile),
-                  label: 'Profile',
+                  icon: Icon(yIcons.settings),
+                  label: 'Settings',
                 ),
               ]),
           body: shell),
