@@ -23,6 +23,23 @@ const List<String> months = [
 
 const List<String> weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
+DateTime get _now => DateTime.now();
+
+final events = [
+  CalendarEventData(
+    date: _now,
+    title: 456.24.toString(),
+    color: yColors.primary,
+    startTime: DateTime(_now.year, _now.month, _now.day, 18, 30),
+  ),
+  CalendarEventData(
+    date: _now,
+    title: 234234.toString(),
+    color: yColors.warn,
+    startTime: DateTime(_now.year, _now.month, _now.day, 18, 30),
+  ),
+];
+
 class CalendarScreen extends StatelessWidget {
   final EventController eventController = EventController();
   final monthState = GlobalKey<MonthViewState>();
@@ -35,7 +52,7 @@ class CalendarScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoScaffold(
         body: MonthView(
-      controller: eventController,
+      controller: eventController..addAll(events),
       key: monthState,
       cellBuilder: (
         date,
@@ -44,24 +61,69 @@ class CalendarScreen extends StatelessWidget {
         isInMonth,
         hideDaysNotInMonth,
       ) {
-        // Return your widget to display as month cell.
-        return Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: yColors.background3,
-              width: 0.5,
-            ),
-            color: isToday ? context.primaryColorDark : context.backgroundColor,
-          ),
-          child: Text(date.day.toString(),
-              style: TextStyle(
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CircleAvatar(
+              maxRadius: 10,
+              backgroundColor: isToday ? context.primaryColor : context.surface,
+              child: Text(
+                date.day.toString(),
+                style: TextStyle(
+                  fontSize: 12,
                   color: isInMonth
-                      ? Theme.of(context).colorScheme.onSurface
+                      ? (isToday
+                          ? Theme.of(context).colorScheme.onPrimary
+                          : Theme.of(context).colorScheme.onSurface)
                       : Theme.of(context)
                           .colorScheme
                           .onSurface
-                          .withValues(alpha: .3))),
+                          .withValues(alpha: .2),
+                ),
+              ),
+            ),
+            if (events.isNotEmpty)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ...events.map((event) {
+                        return Text(
+                          event.title,
+                          style: TextStyle(
+                            color: event.color,
+                            fontSize: 10,
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+              )
+          ],
         );
+
+        // // Return your widget to display as month cell.
+        // return Container(
+        //   decoration: BoxDecoration(
+        //     border: Border.all(
+        //       color: yColors.background3,
+        //       width: 0.5,
+        //     ),
+        //     // color: isToday ? context.primaryColorDark : context.backgroundColor,
+        //   ),
+        //   child: Text(date.day.toString(),
+        //       style: TextStyle(
+        //           color: isInMonth
+        //               ? Theme.of(context).colorScheme.onSurface
+        //               : Theme.of(context)
+        //                   .colorScheme
+        //                   .onSurface
+        //                   .withValues(alpha: .3))),
+        // );
       },
       headerStringBuilder: (date, {secondaryDate}) =>
           "${months[date.month - 1]} ${date.year}",
@@ -112,19 +174,23 @@ class CalendarScreen extends StatelessWidget {
       showWeekends: true,
       minMonth: DateTime(1990),
       maxMonth: DateTime(2050),
-      initialMonth: DateTime(2021),
+      initialMonth: DateTime.now(),
       cellAspectRatio: 1,
       onPageChange: (date, pageIndex) => print("$date, $pageIndex"),
-      onCellTap: (events, date) {
+      onCellTap: (events, date) async {
         // Implement callback when user taps on a cell.
         print(date);
 
-        showCupertinoModalBottomSheet(
+        var result = await showCupertinoModalBottomSheet(
             expand: true,
             isDismissible: false,
             context: context,
             backgroundColor: Colors.transparent,
-            builder: (context) => TransactionModelScreen());
+            builder: (context) => TransactionModelScreen(
+                  date: date,
+                ));
+
+        print(result);
       },
       startDay: WeekDays.sunday, // To change the first day of the week.
       // This callback will only work if cellBuilder is null.

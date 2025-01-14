@@ -5,7 +5,6 @@ import 'package:cotrack/config/config.dart';
 import 'package:cotrack/core/services/logger.dart';
 import 'package:cotrack/core/services/registrations.dart';
 import 'package:cotrack/themes/themes.dart';
-import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:fquery/fquery.dart';
 import 'package:loader_overlay/loader_overlay.dart';

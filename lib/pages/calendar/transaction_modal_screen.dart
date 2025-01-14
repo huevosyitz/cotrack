@@ -1,13 +1,21 @@
 import 'package:awesome_extensions/awesome_extensions.dart';
-import 'package:cotrack/core/models/models.dart';
-import 'package:cotrack/core/services/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:intl/intl.dart';
 
+import 'package:cotrack/core/models/models.dart';
+import 'package:cotrack/core/services/services.dart';
+
 class TransactionModelScreen extends StatefulWidget {
-  const TransactionModelScreen({super.key});
+  final DateTime? date;
+  final TransactionCategory? category;
+
+  const TransactionModelScreen({
+    super.key,
+    this.date,
+    this.category,
+  });
 
   @override
   State<TransactionModelScreen> createState() => _TransactionModelScreenState();
@@ -16,12 +24,34 @@ class TransactionModelScreen extends StatefulWidget {
 class _TransactionModelScreenState extends State<TransactionModelScreen> {
   TransactionType selectedType = TransactionType.expense;
   final _formKey = GlobalKey<FormBuilderState>();
-  List<String> genderOptions = ['Male', 'Female', 'Other'];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(selectedType.displayName, style: context.bodyMedium),
+        title: SegmentedButton<TransactionType>(
+          segments: const <ButtonSegment<TransactionType>>[
+            ButtonSegment<TransactionType>(
+              value: TransactionType.income,
+              label: Text('Income'),
+              // icon: Icon(Icons.calendar_view_day)
+            ),
+            ButtonSegment<TransactionType>(
+              value: TransactionType.expense,
+              label: Text('Expense'),
+              // icon: Icon(Icons.calendar_view_week)
+            ),
+          ],
+          selected: <TransactionType>{selectedType},
+          onSelectionChanged: (Set<TransactionType> transactionSelected) {
+            setState(() {
+              // By default there is only a single segment that can be
+              // selected at one time, so its value is always the first
+              // item in the selected set.
+              selectedType = transactionSelected.first;
+            });
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -29,34 +59,6 @@ class _TransactionModelScreenState extends State<TransactionModelScreen> {
           child: Column(
             spacing: 12,
             children: [
-              SegmentedButton<TransactionType>(
-                segments: const <ButtonSegment<TransactionType>>[
-                  ButtonSegment<TransactionType>(
-                    value: TransactionType.income,
-                    label: Text('Income'),
-                    // icon: Icon(Icons.calendar_view_day)
-                  ),
-                  ButtonSegment<TransactionType>(
-                    value: TransactionType.expense,
-                    label: Text('Expense'),
-                    // icon: Icon(Icons.calendar_view_week)
-                  ),
-                  ButtonSegment<TransactionType>(
-                    value: TransactionType.transfer,
-                    label: Text('Transfer'),
-                    // icon: Icon(Icons.calendar_view_month)
-                  ),
-                ],
-                selected: <TransactionType>{selectedType},
-                onSelectionChanged: (Set<TransactionType> transactionSelected) {
-                  setState(() {
-                    // By default there is only a single segment that can be
-                    // selected at one time, so its value is always the first
-                    // item in the selected set.
-                    selectedType = transactionSelected.first;
-                  });
-                },
-              ),
               FormBuilder(
                 key: _formKey,
                 child: Column(
@@ -67,6 +69,8 @@ class _TransactionModelScreenState extends State<TransactionModelScreen> {
                       format: DateFormat('yyyy-MMM-dd'),
                       enabled: true,
                       inputType: InputType.date,
+                      initialDate: widget.date ?? DateTime.now(),
+                      initialValue: widget.date ?? DateTime.now(),
                       decoration: InputDecoration(
                           labelText: 'Date',
                           floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -82,11 +86,25 @@ class _TransactionModelScreenState extends State<TransactionModelScreen> {
                         FormBuilderValidators.required(),
                       ]),
                     ),
+                    FormBuilderTextField(
+                      name: 'amount',
+                      keyboardType: TextInputType.number,
+                      autofocus: true,
+                      decoration: const InputDecoration(
+                          labelText: 'Amount',
+                          floatingLabelBehavior: FloatingLabelBehavior.always),
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(),
+                        FormBuilderValidators.positiveNumber(),
+                      ]),
+                    ),
                     FormBuilderChoiceChip<dynamic>(
                       name: 'category',
                       decoration: const InputDecoration(labelText: 'Category'),
-                      initialValue: 1,
+                      initialValue: widget.category?.id,
                       spacing: 3,
+                      showCheckmark: false,
+                      visualDensity: VisualDensity.compact,
                       options: TransactionCategoryService.transactionCategories
                           .map((category) => FormBuilderChipOption(
                                 value: category.id,
@@ -97,21 +115,10 @@ class _TransactionModelScreenState extends State<TransactionModelScreen> {
                         print(value);
                       },
                     ),
-                    FormBuilderTextField(
-                      name: 'amount',
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                          labelText: 'Amount',
-                          floatingLabelBehavior: FloatingLabelBehavior.always),
-                      validator: FormBuilderValidators.compose([
-                        FormBuilderValidators.required(),
-                        FormBuilderValidators.positiveNumber(),
-                      ]),
-                    ),
                     FormBuilderChoiceChip<dynamic>(
                       name: 'type',
                       decoration: const InputDecoration(labelText: 'Account'),
-                      initialValue: "Debit Card",
+                      initialValue: "Cash",
                       spacing: 3,
                       options: const [
                         FormBuilderChipOption(value: "Cash"),
@@ -153,7 +160,7 @@ class _TransactionModelScreenState extends State<TransactionModelScreen> {
                           // );
                           // TransactionService.addTransaction(transaction);
                           // Navigator.of(context).pop();
-                          context.pop();
+                          context.pop(_formKey.currentState?.value);
                         }
                       },
                       child: const Text('Save'),
