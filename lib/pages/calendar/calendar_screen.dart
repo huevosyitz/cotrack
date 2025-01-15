@@ -50,7 +50,7 @@ class CalendarScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoScaffold(
+    return Scaffold(
         body: MonthView(
       controller: eventController..addAll(events),
       key: monthState,
@@ -184,6 +184,7 @@ class CalendarScreen extends StatelessWidget {
         var result = await showCupertinoModalBottomSheet(
             expand: true,
             isDismissible: false,
+            useRootNavigator: true,
             context: context,
             backgroundColor: Colors.transparent,
             builder: (context) => TransactionModelScreen(

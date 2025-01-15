@@ -46,7 +46,7 @@ class SettingsScreen extends WatchingWidget {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        "${user.firstName} ${user.lastName}",
+                        user.username,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,

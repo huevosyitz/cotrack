@@ -1,4 +1,5 @@
 import 'package:awesome_extensions/awesome_extensions.dart';
+import 'package:cotrack/core/state/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -6,8 +7,9 @@ import 'package:intl/intl.dart';
 
 import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
+import 'package:watch_it/watch_it.dart';
 
-class TransactionModelScreen extends StatefulWidget {
+class TransactionModelScreen extends WatchingStatefulWidget {
   final DateTime? date;
   final TransactionCategory? category;
 
@@ -24,9 +26,12 @@ class TransactionModelScreen extends StatefulWidget {
 class _TransactionModelScreenState extends State<TransactionModelScreen> {
   TransactionType selectedType = TransactionType.expense;
   final _formKey = GlobalKey<FormBuilderState>();
+  final transactionService = di.get<TransactionService>();
 
   @override
   Widget build(BuildContext context) {
+    final user = watchValue(((AppState s) => s.currentUser));
+
     return Scaffold(
       appBar: AppBar(
         title: SegmentedButton<TransactionType>(
@@ -99,7 +104,7 @@ class _TransactionModelScreenState extends State<TransactionModelScreen> {
                       ]),
                     ),
                     FormBuilderChoiceChip<dynamic>(
-                      name: 'category',
+                      name: 'category_id',
                       decoration: const InputDecoration(labelText: 'Category'),
                       initialValue: widget.category?.id,
                       spacing: 3,
@@ -114,6 +119,9 @@ class _TransactionModelScreenState extends State<TransactionModelScreen> {
                       onChanged: (value) {
                         print(value);
                       },
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(),
+                      ]),
                     ),
                     FormBuilderChoiceChip<dynamic>(
                       name: 'type',
@@ -130,7 +138,7 @@ class _TransactionModelScreenState extends State<TransactionModelScreen> {
                       },
                     ),
                     FormBuilderTextField(
-                      name: 'note',
+                      name: 'notes',
                       decoration: const InputDecoration(
                           labelText: 'Notes',
                           floatingLabelBehavior: FloatingLabelBehavior.always),
@@ -138,7 +146,7 @@ class _TransactionModelScreenState extends State<TransactionModelScreen> {
                     MaterialButton(
                       minWidth: double.infinity,
                       color: Theme.of(context).colorScheme.primary,
-                      onPressed: () {
+                      onPressed: () async {
                         // Validate and save the form values
                         _formKey.currentState?.saveAndValidate();
                         debugPrint(_formKey.currentState?.value.toString());
@@ -160,7 +168,32 @@ class _TransactionModelScreenState extends State<TransactionModelScreen> {
                           // );
                           // TransactionService.addTransaction(transaction);
                           // Navigator.of(context).pop();
-                          context.pop(_formKey.currentState?.value);
+
+                          // Save the form data
+
+                          var form = _formKey.currentState!.value;
+
+                          if (user == null) {
+                            throw Exception("User not found");
+                          }
+
+                          final transaction = Transaction(
+                              id: 0,
+                              created_at: DateTime.now(),
+                              transaction_date: form["date"],
+                              amount: double.parse(form["amount"]),
+                              category_id: form["category_id"],
+                              notes: form["notes"],
+                              created_by: user.id,
+                              updated_by: user.id,
+                              group_id: user.groupId);
+
+                          var tran = await transactionService
+                              .createTransaction(transaction);
+
+                          Loggy.info("Created transaction: $tran");
+
+                          if (context.mounted) context.pop();
                         }
                       },
                       child: const Text('Save'),

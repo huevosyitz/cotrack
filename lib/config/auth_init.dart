@@ -27,7 +27,7 @@ class AuthInit {
           // handle mfa challenge verified
 
           if (session?.user.id != null) {
-            final user = await userService.getUser(session!.user.id);
+            final user = await userService.getCurrentUser();
             await appState.setCurrentUser(user);
           } else {
             await appState.setCurrentUser(null);

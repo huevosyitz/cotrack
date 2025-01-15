@@ -11,7 +11,6 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appState = di.get<AppState>();
-    // final user = watchValue(((AppState s) => s.currentUser));
 
     return Scaffold(
       body: SafeArea(
@@ -21,12 +20,23 @@ class LoginScreen extends StatelessWidget {
             SupaEmailAuth(
               onSignInComplete: (response) async {
                 if (response.user != null) {
-                  final user = await userService.getUser(response.user!.id);
+                  final user = await userService.getCurrentUser();
                   await appState.setCurrentUser(user);
                 }
               },
               onSignUpComplete: (response) {},
               metadataFields: [
+                MetaDataField(
+                  prefixIcon: const Icon(Icons.person),
+                  label: 'Username',
+                  key: 'username',
+                  validator: (val) {
+                    if (val == null || val.isEmpty) {
+                      return 'Please enter something';
+                    }
+                    return null;
+                  },
+                ),
                 MetaDataField(
                   prefixIcon: const Icon(Icons.person),
                   label: 'Username',
