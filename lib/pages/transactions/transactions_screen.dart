@@ -1,8 +1,6 @@
-import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
-import 'package:cotrack/themes/extensions.dart';
 import 'package:cotrack/themes/themes.dart';
 import 'package:cotrack/utils/extensions.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +44,6 @@ class TransactionsScreen extends HookWidget {
                   itemCount: transactionList.length,
                   itemBuilder: (context, index) {
                     return Slidable(
-                      
                       // The end action pane is the one at the right or the bottom side.
                       endActionPane: ActionPane(
                         extentRatio: .4,
@@ -64,7 +61,8 @@ class TransactionsScreen extends HookWidget {
                                     .deleteTransactionMutation(),
                                 builder: (context, state, mutate) {
                                   return SlidableAction(
-                                    onPressed: (_) => mutate(transactionList[index]),
+                                    onPressed: (_) =>
+                                        mutate(transactionList[index]),
                                     backgroundColor:
                                         context.colorScheme.errorContainer,
                                     foregroundColor:
@@ -83,7 +81,8 @@ class TransactionsScreen extends HookWidget {
                                     transactionList[index].category_id]
                                 ?.name ??
                             "Unknown"),
-                        subtitle: Text(transactionList[index].amount.toString()),
+                        subtitle:
+                            Text(transactionList[index].amount.toString()),
                       ),
                     );
                   },
