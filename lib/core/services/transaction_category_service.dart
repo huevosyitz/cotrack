@@ -27,3 +27,4 @@ class TransactionCategoryService {
         .addTransactionCategory(transactionCategory);
   }
 }
+
