@@ -1,12 +1,13 @@
 import 'package:awesome_extensions/awesome_extensions.dart';
+import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:cotrack/components/components.dart';
 import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
 import 'package:cotrack/pages/calendar/transaction_modal_screen.dart';
 import 'package:cotrack/themes/themes.dart';
+import 'package:cotrack/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:fquery/fquery.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:reorderables/reorderables.dart';
 import 'package:watch_it/watch_it.dart';
@@ -16,37 +17,37 @@ class HomeScreen extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final categoryListQuery = useQuery(["transactionCategories"],
-        di<TransactionCategoryService>().getTransactionCategories);
-
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(
           child: Column(children: [
-            Builder(builder: (context) {
-              if (categoryListQuery.isLoading) {
-                return const Center(
-                    child: SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator()));
-              }
+            QueryBuilder(
+                query: di<TransactionCategoryService>()
+                    .ggetTransactionCategoriesQuery(),
+                builder: (context, state) {
+                  if (state.isLoading) {
+                    return const Center(
+                        child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator()));
+                  }
 
-              if (categoryListQuery.isError) {
-                Loggy.error("Error: ${categoryListQuery.error}");
-                return Center(
-                  child: Text(
-                    'Error: ${categoryListQuery.error}',
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                );
-              }
+                  if (state.isError) {
+                    Loggy.error("Error: ${state.error}");
+                    return Center(
+                      child: Text(
+                        'Error: ${state.error}',
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    );
+                  }
 
-              var list = categoryListQuery.data as List<TransactionCategory>;
+                  var list = state.data as List<TransactionCategory>;
 
-              return CategoryGridWrapper(categories: list);
-            })
+                  return CategoryGridWrapper(categories: list);
+                })
           ]),
         ),
       ),

@@ -1,3 +1,4 @@
+import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/repo/repo.dart';
 
@@ -5,6 +6,7 @@ class TransactionCategoryService {
   final TransactionCategoryRepository _transactionCategoryRepository;
   static List<TransactionCategory> transactionCategories = [];
   static Map<int, TransactionCategory> transactionCategoriesMap = {};
+  static final queryKey = "getTransactionCategories";
 
   TransactionCategoryService(this._transactionCategoryRepository);
 
@@ -25,5 +27,12 @@ class TransactionCategoryService {
       TransactionCategory transactionCategory) async {
     await _transactionCategoryRepository
         .addTransactionCategory(transactionCategory);
+  }
+
+  Query<List<TransactionCategory>> ggetTransactionCategoriesQuery() {
+    // Get transactions for group
+
+    return Query(
+        key: queryKey, queryFn: getTransactionCategories, initialData: []);
   }
 }
