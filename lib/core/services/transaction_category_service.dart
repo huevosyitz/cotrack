@@ -4,6 +4,7 @@ import 'package:cotrack/core/repo/repo.dart';
 class TransactionCategoryService {
   final TransactionCategoryRepository _transactionCategoryRepository;
   static List<TransactionCategory> transactionCategories = [];
+  static Map<int, TransactionCategory> transactionCategoriesMap = {};
 
   TransactionCategoryService(this._transactionCategoryRepository);
 
@@ -11,6 +12,8 @@ class TransactionCategoryService {
     var result =
         await _transactionCategoryRepository.getAllTransactionCategories();
     transactionCategories = result;
+
+    transactionCategoriesMap = {for (var v in transactionCategories) v.id: v};
     return result;
   }
 

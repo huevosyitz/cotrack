@@ -1,6 +1,5 @@
 import 'package:cotrack/core/models/user.dart';
 import 'package:cotrack/core/repo/repo.dart';
-import 'package:cotrack/core/repo/user_repo.dart';
 
 class UserService {
   final UserRepo _userRepo;

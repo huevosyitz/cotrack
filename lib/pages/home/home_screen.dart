@@ -16,10 +16,8 @@ class HomeScreen extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    final categoryListQuery = useQuery(["transactionCategories"], () async {
-      return await di<TransactionCategoryService>().getTransactionCategories();
-    });
+    final categoryListQuery = useQuery(["transactionCategories"],
+        di<TransactionCategoryService>().getTransactionCategories);
 
     return Scaffold(
       body: Padding(
