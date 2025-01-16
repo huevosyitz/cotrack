@@ -23,6 +23,7 @@ class AppShell extends WatchingWidget {
               // selectedItemColor: yColors.primary,
               // unselectedItemColor: yColors.background3,
               showUnselectedLabels: true,
+              
               items: [
                 BottomNavigationBarItem(
                   icon: Icon(

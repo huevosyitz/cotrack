@@ -12,7 +12,7 @@ class AppRoutes {
   AppRoutes._();
   static const home = 'home';
   static const calendar = 'calendar';
-  static const stats = 'stats';
+  static const transactions = 'transactions';
   static const accounts = 'accounts';
   static const profile = 'profile';
   static const settings = 'settings';
@@ -135,9 +135,9 @@ final appRouter = GoRouter(
           ]),
           StatefulShellBranch(routes: [
             GoRoute(
-              name: AppRoutes.stats,
-              path: '/stats',
-              builder: (context, state) => StatsScreen(),
+              name: AppRoutes.transactions,
+              path: '/transactions',
+              builder: (context, state) => TransactionsScreen(),
             ),
           ]),
           StatefulShellBranch(routes: [
