@@ -7,7 +7,8 @@ class TransactionRepo {
 
     var tran = transaction.toMap()..remove("id");
 
-    var result = await supaClient.from("transactions").insert(tran).select().single();
+    var result =
+        await supaClient.from("transactions").insert(tran).select().single();
 
     return Transaction.fromMap(result);
   }
@@ -33,7 +34,11 @@ class TransactionRepo {
   Future<void> deleteTransaction(Transaction transaction) async {
     // Delete transaction
 
-    await supaClient.from("transactions").delete().eq("id", transaction.id);
+    await supaClient
+        .from("transactions")
+        .delete()
+        .eq("id", transaction.id)
+        .select();
   }
 
   Future<List<Transaction>> getTransactionsForGroup(int groupId) async {

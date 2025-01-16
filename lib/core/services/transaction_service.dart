@@ -68,4 +68,29 @@ class TransactionService {
       },
     );
   }
+
+  Mutation<void, Transaction> deleteTransactionMutation() {
+    return Mutation(
+      key: "deleteTransaction",
+      invalidateQueries: [queryKey],
+      queryFn: deleteTransaction,
+      onStartMutation: (transaction) {
+        final query =
+            CachedQuery.instance.getQuery(queryKey) as Query<List<Transaction>>;
+        final fallback = query.state.data;
+
+        // optimistically set the data
+        query.update((oldData) => oldData?.where((t) => t.id != transaction.id).toList());
+
+        // return the previous data so that we can fallback to it if the
+        // mutation fails.
+        return fallback;
+      },
+      onError: (arg, error, fallback) {
+        Loggy.error("Error deleting transaction: $error");
+        CachedQuery.instance.updateQuery(
+            key: queryKey, updateFn: (_) => fallback as List<Transaction>);
+      },
+    );
+  }
 }

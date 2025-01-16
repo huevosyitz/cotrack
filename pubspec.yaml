@@ -60,6 +60,7 @@ dependencies:
   flutter_hooks: ^0.20.5
   cached_query_flutter: ^2.6.0
   cached_storage: ^2.0.14
+  flutter_slidable: ^3.1.2
 
 dev_dependencies:
   flutter_test:

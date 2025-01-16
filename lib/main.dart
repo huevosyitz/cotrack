@@ -30,6 +30,8 @@ Future<void> main() async {
   await DatabaseSetup.init();
   await AuthInit.init();
 
+  CachedQuery.instance.deleteCache();
+
   CachedQuery.instance.configFlutter(
     storage: await CachedStorage.ensureInitialized(),
     config: QueryConfigFlutter(
