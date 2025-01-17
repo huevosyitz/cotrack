@@ -2,7 +2,6 @@ import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:cotrack/core/models/models.dart';
-import 'package:cotrack/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:watch_it/watch_it.dart';
@@ -46,7 +45,7 @@ DateTime get _now => DateTime.now();
 // ];
 
 class CalendarScreen extends StatelessWidget {
-  CalendarScreen({
+  const CalendarScreen({
     super.key,
   });
 
