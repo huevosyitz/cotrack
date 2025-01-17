@@ -5,6 +5,7 @@ import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:cached_storage/cached_storage.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:cotrack/config/config.dart';
+import 'package:cotrack/config/data_init.dart';
 import 'package:cotrack/core/services/logger.dart';
 import 'package:cotrack/core/services/registrations.dart';
 import 'package:cotrack/themes/themes.dart';
@@ -29,6 +30,7 @@ Future<void> main() async {
   await AppConfig.init();
   await DatabaseSetup.init();
   await AuthInit.init();
+  await DataInit.init();
 
   CachedQuery.instance.deleteCache();
 

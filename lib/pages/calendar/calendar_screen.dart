@@ -1,10 +1,15 @@
 import 'package:awesome_extensions/awesome_extensions.dart';
+import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:calendar_view/calendar_view.dart';
-import 'package:cotrack/pages/calendar/transaction_modal_screen.dart';
+import 'package:cotrack/core/models/models.dart';
+import 'package:cotrack/utils/extensions.dart';
 import 'package:flutter/material.dart';
-
-import 'package:cotrack/themes/themes.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:watch_it/watch_it.dart';
+
+import 'package:cotrack/core/services/services.dart';
+import 'package:cotrack/pages/calendar/transaction_modal_screen.dart';
+import 'package:cotrack/themes/themes.dart';
 
 const List<String> months = [
   "Jan",
@@ -25,34 +30,71 @@ const List<String> weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 DateTime get _now => DateTime.now();
 
-final events = [
-  CalendarEventData(
-    date: _now,
-    title: 456.24.toString(),
-    color: yColors.primary,
-    startTime: DateTime(_now.year, _now.month, _now.day, 18, 30),
-  ),
-  CalendarEventData(
-    date: _now,
-    title: 234234.toString(),
-    color: yColors.warn,
-    startTime: DateTime(_now.year, _now.month, _now.day, 18, 30),
-  ),
-];
+// final events = [
+//   CalendarEventData(
+//     date: _now,
+//     title: 456.24.toString(),
+//     color: yColors.primary,
+//     startTime: DateTime(_now.year, _now.month, _now.day, 18, 30),
+//   ),
+//   CalendarEventData(
+//     date: _now,
+//     title: 234234.toString(),
+//     color: yColors.warn,
+//     startTime: DateTime(_now.year, _now.month, _now.day, 18, 30),
+//   ),
+// ];
 
 class CalendarScreen extends StatelessWidget {
-  final EventController eventController = EventController();
-  final monthState = GlobalKey<MonthViewState>();
-
   CalendarScreen({
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: MonthView(
-      controller: eventController..addAll(events),
+    return Scaffold(body: CalendarMonthView());
+  }
+}
+
+class CalendarMonthView extends StatelessWidget {
+  final EventController eventController = EventController();
+  final monthState = GlobalKey<MonthViewState>();
+
+  CalendarMonthView({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final q = di.get<TransactionService>().getAllMyTransactionsQuery();
+    final categoryService = di.get<TransactionCategoryService>();
+
+    q.stream.listen((state) {
+      if (state.status == QueryStatus.loading) {
+        // show loading spinner
+      }
+      if (state.data != null) {
+        eventController.removeWhere((e) => true);
+        final transactionList = state.data as List<Transaction>;
+
+        final newEvents = transactionList
+            .map((transaction) => CalendarEventData(
+                  date: transaction.transaction_date,
+                  title: transaction.amount.toString(),
+                  event: transaction,
+                  color:
+                      categoryService.isIncomeCategory(transaction.category_id)
+                          ? yColors.primary
+                          : yColors.warn,
+                ))
+            .toList();
+
+        eventController.addAll(newEvents);
+      }
+    });
+
+    return MonthView(
+      controller: eventController,
       key: monthState,
       cellBuilder: (
         date,
@@ -61,6 +103,18 @@ class CalendarScreen extends StatelessWidget {
         isInMonth,
         hideDaysNotInMonth,
       ) {
+        final expenseAmount = events
+            .map((e) => (e.event as Transaction))
+            .where((e) => categoryService.isExpenseCategory(e.category_id))
+            .map((e) => e.amount)
+            .fold(0.0, (value, element) => value + element);
+
+        final incomeAmount = events
+            .map((e) => (e.event as Transaction))
+            .where((e) => categoryService.isIncomeCategory(e.category_id))
+            .map((e) => e.amount)
+            .fold(0.0, (value, element) => value + element);
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -73,8 +127,8 @@ class CalendarScreen extends StatelessWidget {
                   fontSize: 12,
                   color: isInMonth
                       ? (isToday
-                          ? Theme.of(context).colorScheme.onPrimary
-                          : Theme.of(context).colorScheme.onSurface)
+                          ? context.colorScheme.onPrimary
+                          : context.colorScheme.onSurface)
                       : Theme.of(context)
                           .colorScheme
                           .onSurface
@@ -85,20 +139,27 @@ class CalendarScreen extends StatelessWidget {
             if (events.isNotEmpty)
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.only(top: 20, left: 8, right: 8),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ...events.map((event) {
-                        return Text(
-                          event.title,
+                      if (expenseAmount > 0)
+                        Text(
+                          expenseAmount.toString(),
                           style: TextStyle(
-                            color: event.color,
-                            fontSize: 10,
+                            color: yColors.warn,
+                            fontSize: 12,
                           ),
-                        );
-                      }),
+                        ),
+                      if (incomeAmount > 0)
+                        Text(
+                          incomeAmount.toString(),
+                          style: TextStyle(
+                            color: yColors.primary,
+                            fontSize: 12,
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -169,7 +230,7 @@ class CalendarScreen extends StatelessWidget {
         //     .toString()
         //     .substring(WeekDays.values[day].toString().indexOf('.') + 1)),
       ),
-      borderSize: 0,
+      borderSize: 1,
       borderColor: yColors.background,
       showWeekends: true,
       minMonth: DateTime(1990),
@@ -201,6 +262,6 @@ class CalendarScreen extends StatelessWidget {
       onDateLongPress: (date) => print(date),
       // headerBuilder: MonthHeader.hidden, // To hide month header
       showWeekTileBorder: false, // To show or hide header border
-    ));
+    );
   }
 }

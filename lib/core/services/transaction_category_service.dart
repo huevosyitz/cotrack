@@ -4,19 +4,22 @@ import 'package:cotrack/core/repo/repo.dart';
 
 class TransactionCategoryService {
   final TransactionCategoryRepository _transactionCategoryRepository;
-  static List<TransactionCategory> transactionCategories = [];
+  static List<TransactionCategory> expenseCategories = [];
+  static List<TransactionCategory> incomeCategories = [];
   static Map<int, TransactionCategory> transactionCategoriesMap = {};
   static final queryKey = "getTransactionCategories";
 
   TransactionCategoryService(this._transactionCategoryRepository);
 
-  Future<List<TransactionCategory>> getTransactionCategories() async {
-    var result =
+  Future<List<TransactionCategory>> setupTransactionCategories() async {
+    var allCategories =
         await _transactionCategoryRepository.getAllTransactionCategories();
-    transactionCategories = result;
+    expenseCategories = allCategories
+        .where((e) => e.transactionType == TransactionType.expense)
+        .toList();
 
-    transactionCategoriesMap = {for (var v in transactionCategories) v.id: v};
-    return result;
+    transactionCategoriesMap = {for (var v in allCategories) v.id: v};
+    return allCategories;
   }
 
   Future<TransactionCategory> getTransactionCategoryById(String id) async {
@@ -29,10 +32,20 @@ class TransactionCategoryService {
         .addTransactionCategory(transactionCategory);
   }
 
-  Query<List<TransactionCategory>> ggetTransactionCategoriesQuery() {
+  bool isExpenseCategory(int categoryId) {
+    return transactionCategoriesMap[categoryId]?.transactionType ==
+        TransactionType.expense;
+  }
+
+  bool isIncomeCategory(int categoryId) {
+    return transactionCategoriesMap[categoryId]?.transactionType ==
+        TransactionType.income;
+  }
+
+  Query<List<TransactionCategory>> getTransactionCategoriesQuery() {
     // Get transactions for group
 
     return Query(
-        key: queryKey, queryFn: getTransactionCategories, initialData: []);
+        key: queryKey, queryFn: setupTransactionCategories, initialData: []);
   }
 }

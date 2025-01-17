@@ -112,7 +112,7 @@ class _TransactionModelScreenState extends State<TransactionModelScreen> {
                       spacing: 3,
                       showCheckmark: false,
                       visualDensity: VisualDensity.compact,
-                      options: TransactionCategoryService.transactionCategories
+                      options: TransactionCategoryService.expenseCategories
                           .map((category) => FormBuilderChipOption(
                                 value: category.id,
                                 child: Text(category.name),
