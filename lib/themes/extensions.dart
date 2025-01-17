@@ -54,6 +54,8 @@ extension BuildContextEntension<T> on BuildContext {
       textColor: yColors.primaryText,
     );
   }
+
+  ColorScheme get colorScheme => Theme.of(this).colorScheme;
 }
 
 extension PaddingX on Widget {

@@ -1,12 +1,15 @@
+import 'dart:io';
 import 'dart:ui';
 
+import 'package:cached_query_flutter/cached_query_flutter.dart';
+import 'package:cached_storage/cached_storage.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:cotrack/config/config.dart';
+import 'package:cotrack/config/data_init.dart';
 import 'package:cotrack/core/services/logger.dart';
 import 'package:cotrack/core/services/registrations.dart';
 import 'package:cotrack/themes/themes.dart';
 import 'package:flutter/material.dart';
-import 'package:fquery/fquery.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
 Future<void> main() async {
@@ -27,11 +30,20 @@ Future<void> main() async {
   await AppConfig.init();
   await DatabaseSetup.init();
   await AuthInit.init();
+  await DataInit.init();
 
-  final queryClient = QueryClient(
-      defaultQueryOptions: DefaultQueryOptions(
-    cacheDuration: const Duration(days: 1),
-  ));
+  CachedQuery.instance.deleteCache();
+
+  CachedQuery.instance.configFlutter(
+    storage: await CachedStorage.ensureInitialized(),
+    config: QueryConfigFlutter(
+      // Globally set the refetch duration
+      refetchDuration: Duration(hours: 24),
+    ),
+    observers: [
+      QueryLoggingObserver(colors: !Platform.isIOS),
+    ],
+  );
 
   runApp(GlobalLoaderOverlay(
     overlayWidgetBuilder: (_) {
@@ -41,23 +53,20 @@ Future<void> main() async {
         ),
       );
     },
-    child: QueryClientProvider(
-      queryClient: queryClient,
-      child: CalendarControllerProvider(
-        controller: EventController(),
-        child: MaterialApp.router(
-          routerConfig: appRouter,
-          debugShowCheckedModeBanner: false,
-          // theme: yTheme.dark,
-          // darkTheme: yTheme.dark,
-          // themeMode: ThemeMode.dark,
-          // The Mandy red, light theme.
-          theme: AppTheme.light,
-          // The Mandy red, dark theme.
-          darkTheme: AppTheme.dark,
-          // Use dark or light theme based on system setting.
-          themeMode: ThemeMode.system,
-        ),
+    child: CalendarControllerProvider(
+      controller: EventController(),
+      child: MaterialApp.router(
+        routerConfig: appRouter,
+        debugShowCheckedModeBanner: false,
+        // theme: yTheme.dark,
+        // darkTheme: yTheme.dark,
+        // themeMode: ThemeMode.dark,
+        // The Mandy red, light theme.
+        theme: AppTheme.light,
+        // The Mandy red, dark theme.
+        darkTheme: AppTheme.dark,
+        // Use dark or light theme based on system setting.
+        themeMode: ThemeMode.system,
       ),
     ),
   ));

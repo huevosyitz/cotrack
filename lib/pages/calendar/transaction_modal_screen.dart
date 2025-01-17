@@ -1,5 +1,7 @@
 import 'package:awesome_extensions/awesome_extensions.dart';
+import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:cotrack/core/state/app_state.dart';
+import 'package:cotrack/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -110,7 +112,7 @@ class _TransactionModelScreenState extends State<TransactionModelScreen> {
                       spacing: 3,
                       showCheckmark: false,
                       visualDensity: VisualDensity.compact,
-                      options: TransactionCategoryService.transactionCategories
+                      options: TransactionCategoryService.expenseCategories
                           .map((category) => FormBuilderChipOption(
                                 value: category.id,
                                 child: Text(category.name),
@@ -143,61 +145,75 @@ class _TransactionModelScreenState extends State<TransactionModelScreen> {
                           labelText: 'Notes',
                           floatingLabelBehavior: FloatingLabelBehavior.always),
                     ),
-                    MaterialButton(
-                      minWidth: double.infinity,
-                      color: Theme.of(context).colorScheme.primary,
-                      onPressed: () async {
-                        // Validate and save the form values
-                        _formKey.currentState?.saveAndValidate();
-                        debugPrint(_formKey.currentState?.value.toString());
+                    MutationBuilder(
+                        mutation:
+                            transactionService.createTransactionMutation(),
+                        builder: (context, snapshot, mutate) {
+                          return MaterialButton(
+                            minWidth: double.infinity,
+                            color: Theme.of(context).colorScheme.primary,
+                            onPressed: snapshot.isLoading
+                                ? null
+                                : () async {
+                                    // Validate and save the form values
+                                    _formKey.currentState?.saveAndValidate();
+                                    debugPrint(_formKey.currentState?.value
+                                        .toString());
 
-                        // On another side, can access all field values without saving form with instantValues
-                        _formKey.currentState?.validate();
-                        debugPrint(
-                            _formKey.currentState?.instantValue.toString());
+                                    // On another side, can access all field values without saving form with instantValues
+                                    _formKey.currentState?.validate();
+                                    debugPrint(_formKey
+                                        .currentState?.instantValue
+                                        .toString());
 
-                        if (_formKey.currentState?.isValid == true) {
-                          // Save the form data
-                          // final transaction = Transaction(
-                          //   id: '1',
-                          //   title: _formKey.currentState?.value['title'],
-                          //   amount: _formKey.currentState?.value['amount'],
-                          //   date: _formKey.currentState?.value['date'],
-                          //   categoryId: _formKey.currentState?.value['category'],
-                          //   note: _formKey.currentState?.value['note'],
-                          // );
-                          // TransactionService.addTransaction(transaction);
-                          // Navigator.of(context).pop();
+                                    if (_formKey.currentState?.isValid ==
+                                        true) {
+                                      // Save the form data
+                                      // final transaction = Transaction(
+                                      //   id: '1',
+                                      //   title: _formKey.currentState?.value['title'],
+                                      //   amount: _formKey.currentState?.value['amount'],
+                                      //   date: _formKey.currentState?.value['date'],
+                                      //   categoryId: _formKey.currentState?.value['category'],
+                                      //   note: _formKey.currentState?.value['note'],
+                                      // );
+                                      // TransactionService.addTransaction(transaction);
+                                      // Navigator.of(context).pop();
 
-                          // Save the form data
+                                      // Save the form data
 
-                          var form = _formKey.currentState!.value;
+                                      var form = _formKey.currentState!.value;
 
-                          if (user == null) {
-                            throw Exception("User not found");
-                          }
+                                      if (user == null) {
+                                        throw Exception("User not found");
+                                      }
 
-                          final transaction = Transaction(
-                              id: 0,
-                              created_at: DateTime.now(),
-                              transaction_date: form["date"],
-                              amount: double.parse(form["amount"]),
-                              category_id: form["category_id"],
-                              notes: form["notes"],
-                              created_by: user.id,
-                              updated_by: user.id,
-                              group_id: user.groupId);
+                                      final transaction = Transaction(
+                                          id: 0,
+                                          created_at: DateTime.now(),
+                                          transaction_date: form["date"],
+                                          amount: double.parse(form["amount"]),
+                                          category_id: form["category_id"],
+                                          notes: form["notes"],
+                                          created_by: user.id,
+                                          updated_by: user.id,
+                                          group_id: user.groupId);
 
-                          var tran = await transactionService
-                              .createTransaction(transaction);
+                                      // var tran = await transactionService
+                                      //     .createTransaction(transaction);
 
-                          Loggy.info("Created transaction: $tran");
+                                      var tran = mutate(transaction);
 
-                          if (context.mounted) context.pop();
-                        }
-                      },
-                      child: const Text('Save'),
-                    )
+                                      Loggy.info("Created transaction: $tran");
+
+                                      if (context.mounted) context.pop();
+                                    }
+                                  },
+                            child: snapshot.isLoading
+                                ? const CircularProgressIndicator()
+                                : const Text('Save'),
+                          );
+                        })
                   ],
                 ),
               ),
