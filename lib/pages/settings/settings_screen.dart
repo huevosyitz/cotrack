@@ -5,6 +5,7 @@ import 'package:cotrack/core/state/app_state.dart';
 import 'package:cotrack/themes/themes.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
+import 'package:web/web.dart' as web;
 
 class SettingsScreen extends WatchingWidget {
   const SettingsScreen({super.key});
@@ -94,6 +95,10 @@ class SettingsScreen extends WatchingWidget {
                           cancelText: "Cancel",
                           confirmText: "Logout",
                           headerText: "Confirm Logout");
+                    }),
+                    _listRouteTile(context, "Reload PWA", yIcons.repair, "",
+                        onTap: () {
+                      web.window.location.reload();
                     }),
                   ],
                 ),
