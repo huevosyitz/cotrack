@@ -61,6 +61,10 @@ dependencies:
   cached_query_flutter: ^2.6.0
   cached_storage: ^2.0.14
   flutter_slidable: ^3.1.2
+  drift: ^2.23.1
+  drift_flutter: ^0.2.4
+  path_provider: ^2.1.5
+  pwa_install_plus: ^0.0.1
 
 dev_dependencies:
   flutter_test:
@@ -72,6 +76,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  drift_dev: ^2.23.1
+  build_runner: ^2.4.14
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

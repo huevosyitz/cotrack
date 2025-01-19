@@ -1,16 +1,16 @@
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:cached_query_flutter/cached_query_flutter.dart';
-import 'package:cached_storage/cached_storage.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:cotrack/config/config.dart';
 import 'package:cotrack/config/data_init.dart';
 import 'package:cotrack/core/services/logger.dart';
 import 'package:cotrack/core/services/registrations.dart';
 import 'package:cotrack/themes/themes.dart';
+import 'package:cotrack/utils/drift_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:pwa_install_plus/pwa_install_plus.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,23 +26,22 @@ Future<void> main() async {
     return true;
   };
 
+  PWAInstall().setup(installCallback: () {
+    debugPrint('APP INSTALLED!');
+  });
+
   Registrations.setup();
   await AppConfig.init();
   await DatabaseSetup.init();
   await AuthInit.init();
   await DataInit.init();
 
-  CachedQuery.instance.deleteCache();
-
   CachedQuery.instance.configFlutter(
-    storage: await CachedStorage.ensureInitialized(),
+    storage: CacheDriftStorage(),
     config: QueryConfigFlutter(
       // Globally set the refetch duration
       refetchDuration: Duration(hours: 24),
     ),
-    observers: [
-      QueryLoggingObserver(colors: !Platform.isIOS),
-    ],
   );
 
   runApp(GlobalLoaderOverlay(
