@@ -35,6 +35,7 @@ class yIcons {
   static const locationPin = FluentIcons.location_24_filled;
   static const add = FluentIcons.add_24_regular;
   static const delete = FluentIcons.delete_24_regular;
+  static const reload = FluentIcons.arrow_sync_24_regular;
 
   // nav
   static const arrowRight = FluentIcons.arrow_right_24_regular;

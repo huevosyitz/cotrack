@@ -96,7 +96,7 @@ class SettingsScreen extends WatchingWidget {
                           confirmText: "Logout",
                           headerText: "Confirm Logout");
                     }),
-                    _listRouteTile(context, "Reload PWA", yIcons.repair, "",
+                    _listRouteTile(context, "Reload App", yIcons.reload, "",
                         onTap: () {
                       web.window.location.reload();
                     }),
