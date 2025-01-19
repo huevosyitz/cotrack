@@ -1,6 +1,7 @@
 import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:calendar_view/calendar_view.dart';
+import 'package:cotrack/config/config.dart';
 import 'package:cotrack/core/models/models.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -114,56 +115,59 @@ class CalendarMonthView extends StatelessWidget {
             .map((e) => e.amount)
             .fold(0.0, (value, element) => value + element);
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CircleAvatar(
-              maxRadius: 10,
-              backgroundColor: isToday ? context.primaryColor : context.surface,
-              child: Text(
-                date.day.toString(),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isInMonth
-                      ? (isToday
-                          ? context.colorScheme.onPrimary
-                          : context.colorScheme.onSurface)
-                      : Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: .2),
-                ),
-              ),
-            ),
-            if (events.isNotEmpty)
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 20, left: 8, right: 8),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (expenseAmount > 0)
-                        Text(
-                          expenseAmount.toString(),
-                          style: TextStyle(
-                            color: yColors.warn,
-                            fontSize: 12,
-                          ),
-                        ),
-                      if (incomeAmount > 0)
-                        Text(
-                          incomeAmount.toString(),
-                          style: TextStyle(
-                            color: yColors.primary,
-                            fontSize: 12,
-                          ),
-                        ),
-                    ],
+        return GestureDetector(
+          onLongPress: () => context.pushTo(AppRoutes.transactions),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                maxRadius: 10,
+                backgroundColor: isToday ? context.primaryColor : context.surface,
+                child: Text(
+                  date.day.toString(),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isInMonth
+                        ? (isToday
+                            ? context.colorScheme.onPrimary
+                            : context.colorScheme.onSurface)
+                        : Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: .2),
                   ),
                 ),
-              )
-          ],
+              ),
+              if (events.isNotEmpty)
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 20, left: 8, right: 8),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (expenseAmount > 0)
+                          Text(
+                            expenseAmount.toString(),
+                            style: TextStyle(
+                              color: yColors.warn,
+                              fontSize: 12,
+                            ),
+                          ),
+                        if (incomeAmount > 0)
+                          Text(
+                            incomeAmount.toString(),
+                            style: TextStyle(
+                              color: yColors.primary,
+                              fontSize: 12,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                )
+            ],
+          ),
         );
 
         // // Return your widget to display as month cell.
@@ -256,7 +260,8 @@ class CalendarMonthView extends StatelessWidget {
       startDay: WeekDays.sunday, // To change the first day of the week.
       // This callback will only work if cellBuilder is null.
       onEventTap: (event, date) => print(event),
-      onEventDoubleTap: (events, date) => print(events),
+      onEventDoubleTap: (events, date) =>
+          context.pushTo(AppRoutes.transactions),
       onEventLongTap: (event, date) => print(event),
       onDateLongPress: (date) => print(date),
       // headerBuilder: MonthHeader.hidden, // To hide month header

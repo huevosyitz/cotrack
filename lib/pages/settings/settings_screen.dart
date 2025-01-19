@@ -13,8 +13,10 @@ class SettingsScreen extends WatchingWidget {
   Widget build(BuildContext context) {
     final user = watchValue(((AppState s) => s.currentUser));
     final authService = di.get<AuthService>();
+    final package =
+        watchFuture((AppState s) => s.packageInfo, initialValue: null);
 
-    if (user == null) {
+    if (user == null || package.isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
       );
@@ -54,6 +56,18 @@ class SettingsScreen extends WatchingWidget {
                       ),
                       Text(
                         user.email,
+                        style: const TextStyle(
+                          fontSize: 10,
+                        ),
+                      ),
+                      Text(
+                        "Version: ${package.data!.version}",
+                        style: const TextStyle(
+                          fontSize: 10,
+                        ),
+                      ),
+                      Text(
+                        "Build Number: ${package.data!.buildNumber}",
                         style: const TextStyle(
                           fontSize: 10,
                         ),
