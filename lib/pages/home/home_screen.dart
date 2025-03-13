@@ -46,10 +46,17 @@ class CategoryGridWrapper extends StatefulWidget {
 
 class _CategoryGridWrapperState extends State<CategoryGridWrapper> {
   List<Widget> categoryWidgets = [];
+  final addCategoryItem = TransactionCategory(
+      id: 0,
+      name: "Add",
+      transactionType: TransactionType.expense,
+      iconData: yIcons.add);
 
   @override
   void initState() {
     super.initState();
+    widget.categories.add(addCategoryItem);
+
     categoryWidgets = widget.categories
         .map((TransactionCategory category) => CategoryIconAvatar(
               avatarSize: 30,
@@ -57,6 +64,11 @@ class _CategoryGridWrapperState extends State<CategoryGridWrapper> {
               category: category,
               showLabel: true,
               onPressed: () {
+                if (category.name == "Add") {
+                  logger.d("Add new category");
+                  return;
+                }
+
                 showCupertinoSheet(
                     context: context,
                     pageBuilder: (context) => TransactionModelScreen(
@@ -80,7 +92,7 @@ class _CategoryGridWrapperState extends State<CategoryGridWrapper> {
       spacing: 22.0,
       runSpacing: 22.0,
       crossAxisAlignment: WrapCrossAlignment.center,
-      alignment: WrapAlignment.spaceBetween,
+      alignment: WrapAlignment.start,
       onReorder: _onReorder,
       children: categoryWidgets,
     );
