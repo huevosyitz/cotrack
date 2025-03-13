@@ -51,16 +51,21 @@ class TransactionService {
       refetchQueries: [queryKey],
       queryFn: createTransaction,
       onStartMutation: (transaction) {
-        final query =
-            CachedQuery.instance.getQuery(queryKey) as Query<List<Transaction>>;
-        final fallback = query.state.data;
+        final queryObject = CachedQuery.instance.getQuery(queryKey);
 
-        // optimistically set the data
-        query.update((oldData) => [...?oldData, transaction]);
+        if (queryObject != null) {
+          final query = queryObject as Query<List<Transaction>>;
+          final fallback = query.state.data;
 
-        // return the previous data so that we can fallback to it if the
-        // mutation fails.
-        return fallback;
+          // optimistically set the data
+          query.update((oldData) => [...?oldData, transaction]);
+
+          // return the previous data so that we can fallback to it if the
+          // mutation fails.
+          return fallback;
+        }
+
+        return [];
       },
       onError: (arg, error, fallback) {
         CachedQuery.instance.updateQuery(
@@ -80,7 +85,8 @@ class TransactionService {
         final fallback = query.state.data;
 
         // optimistically set the data
-        query.update((oldData) => oldData?.where((t) => t.id != transaction.id).toList());
+        query.update((oldData) =>
+            oldData?.where((t) => t.id != transaction.id).toList());
 
         // return the previous data so that we can fallback to it if the
         // mutation fails.

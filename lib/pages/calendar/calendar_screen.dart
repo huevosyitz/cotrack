@@ -2,8 +2,8 @@ import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:cotrack/core/models/models.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:watch_it/watch_it.dart';
 
 import 'package:cotrack/core/services/services.dart';
@@ -241,17 +241,21 @@ class CalendarMonthView extends StatelessWidget {
         // Implement callback when user taps on a cell.
         print(date);
 
-        var result = await showCupertinoModalBottomSheet(
-            expand: true,
-            isDismissible: false,
-            useRootNavigator: true,
+        showCupertinoSheet(
             context: context,
-            backgroundColor: Colors.transparent,
-            builder: (context) => TransactionModelScreen(
+            pageBuilder: (context) => TransactionModelScreen(
                   date: date,
                 ));
 
-        print(result);
+        // var result = await showCupertinoModalBottomSheet(
+        //     expand: true,
+        //     isDismissible: false,
+        //     useRootNavigator: true,
+        //     context: context,
+        //     backgroundColor: Colors.transparent,
+        //     builder: (context) => TransactionModelScreen(
+        //           date: date,
+        //         ));
       },
       startDay: WeekDays.sunday, // To change the first day of the week.
       // This callback will only work if cellBuilder is null.

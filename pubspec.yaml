@@ -41,7 +41,7 @@ dependencies:
   flutter_dotenv: ^5.2.1
   logger: ^2.5.0
   touchable_opacity: ^1.2.0
-  watch_it: ^1.6.2
+  watch_it: ^1.6.3
   modal_bottom_sheet: ^3.0.0
   font_awesome_flutter: ^10.8.0
   dio_cache_interceptor: ^3.5.1

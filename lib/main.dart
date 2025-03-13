@@ -32,19 +32,6 @@ Future<void> main() async {
   await AuthInit.init();
   await DataInit.init();
 
-  CachedQuery.instance.deleteCache();
-
-  CachedQuery.instance.configFlutter(
-    storage: await CachedStorage.ensureInitialized(),
-    config: QueryConfigFlutter(
-      // Globally set the refetch duration
-      refetchDuration: Duration(hours: 24),
-    ),
-    observers: [
-      QueryLoggingObserver(colors: !Platform.isIOS),
-    ],
-  );
-
   runApp(GlobalLoaderOverlay(
     overlayWidgetBuilder: (_) {
       return const Center(

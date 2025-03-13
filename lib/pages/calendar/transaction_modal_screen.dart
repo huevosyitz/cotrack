@@ -1,7 +1,8 @@
-import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:cotrack/core/state/app_state.dart';
+import 'package:cotrack/themes/themes.dart';
 import 'package:cotrack/utils/extensions.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -11,54 +12,61 @@ import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
 import 'package:watch_it/watch_it.dart';
 
-class TransactionModelScreen extends WatchingStatefulWidget {
+class TransactionModelScreen extends WatchingWidget {
   final DateTime? date;
   final TransactionCategory? category;
+  final _formKey = GlobalKey<FormBuilderState>();
+  final selectedCategoryType =
+      ValueNotifier<TransactionType>(TransactionType.expense);
 
-  const TransactionModelScreen({
+  TransactionModelScreen({
     super.key,
     this.date,
     this.category,
   });
 
   @override
-  State<TransactionModelScreen> createState() => _TransactionModelScreenState();
-}
-
-class _TransactionModelScreenState extends State<TransactionModelScreen> {
-  TransactionType selectedType = TransactionType.expense;
-  final _formKey = GlobalKey<FormBuilderState>();
-  final transactionService = di.get<TransactionService>();
-
-  @override
   Widget build(BuildContext context) {
+    final transactionService = di.get<TransactionService>();
     final user = watchValue(((AppState s) => s.currentUser));
+    final selectedType = watch(selectedCategoryType).value;
+
+    // return Scaffold(
+    //   body: Center(child: Text("HELLO"),),
+    // );
 
     return Scaffold(
-      appBar: AppBar(
-        title: SegmentedButton<TransactionType>(
-          segments: const <ButtonSegment<TransactionType>>[
-            ButtonSegment<TransactionType>(
-              value: TransactionType.income,
-              label: Text('Income'),
-              // icon: Icon(Icons.calendar_view_day)
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(56),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(children: [
+            IconButton(
+              icon: const Icon(yIcons.leftArrow),
+              onPressed: () {
+                CupertinoSheetRoute.popSheet(context);
+              },
             ),
-            ButtonSegment<TransactionType>(
-              value: TransactionType.expense,
-              label: Text('Expense'),
-              // icon: Icon(Icons.calendar_view_week)
+            SegmentedButton<TransactionType>(
+              segments: const <ButtonSegment<TransactionType>>[
+                ButtonSegment<TransactionType>(
+                  value: TransactionType.income,
+                  label: Text('Income'),
+                  // icon: Icon(Icons.calendar_view_day)
+                ),
+                ButtonSegment<TransactionType>(
+                  value: TransactionType.expense,
+                  label: Text('Expense'),
+                  // icon: Icon(Icons.calendar_view_week)
+                ),
+              ],
+              selected: <TransactionType>{selectedType},
+              onSelectionChanged: (Set<TransactionType> transactionSelected) {
+                selectedCategoryType.value = transactionSelected.first;
+              },
             ),
-          ],
-          selected: <TransactionType>{selectedType},
-          onSelectionChanged: (Set<TransactionType> transactionSelected) {
-            setState(() {
-              // By default there is only a single segment that can be
-              // selected at one time, so its value is always the first
-              // item in the selected set.
-              selectedType = transactionSelected.first;
-            });
-          },
-        ),
+          ]),
+        ), 
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -76,8 +84,8 @@ class _TransactionModelScreenState extends State<TransactionModelScreen> {
                       format: DateFormat('yyyy-MMM-dd'),
                       enabled: true,
                       inputType: InputType.date,
-                      initialDate: widget.date ?? DateTime.now(),
-                      initialValue: widget.date ?? DateTime.now(),
+                      initialDate: date ?? DateTime.now(),
+                      initialValue: date ?? DateTime.now(),
                       decoration: InputDecoration(
                           labelText: 'Date',
                           floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -108,7 +116,7 @@ class _TransactionModelScreenState extends State<TransactionModelScreen> {
                     FormBuilderChoiceChip<dynamic>(
                       name: 'category_id',
                       decoration: const InputDecoration(labelText: 'Category'),
-                      initialValue: widget.category?.id,
+                      initialValue: category?.id,
                       spacing: 3,
                       showCheckmark: false,
                       visualDensity: VisualDensity.compact,
@@ -206,7 +214,8 @@ class _TransactionModelScreenState extends State<TransactionModelScreen> {
 
                                       Loggy.info("Created transaction: $tran");
 
-                                      if (context.mounted) context.pop();
+                                      // if (context.mounted) context.pop();
+                                      CupertinoSheetRoute.popSheet(context);
                                     }
                                   },
                             child: snapshot.isLoading
