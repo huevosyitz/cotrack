@@ -4,6 +4,7 @@ import 'package:calendar_view/calendar_view.dart';
 import 'package:cotrack/core/models/models.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:watch_it/watch_it.dart';
 
 import 'package:cotrack/core/services/services.dart';
@@ -26,23 +27,6 @@ const List<String> months = [
 ];
 
 const List<String> weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-DateTime get _now => DateTime.now();
-
-// final events = [
-//   CalendarEventData(
-//     date: _now,
-//     title: 456.24.toString(),
-//     color: yColors.primary,
-//     startTime: DateTime(_now.year, _now.month, _now.day, 18, 30),
-//   ),
-//   CalendarEventData(
-//     date: _now,
-//     title: 234234.toString(),
-//     color: yColors.warn,
-//     startTime: DateTime(_now.year, _now.month, _now.day, 18, 30),
-//   ),
-// ];
 
 class CalendarScreen extends StatelessWidget {
   const CalendarScreen({
@@ -71,6 +55,8 @@ class CalendarMonthView extends StatelessWidget {
     q.stream.listen((state) {
       if (state.status == QueryStatus.loading) {
         // show loading spinner
+
+        context.loaderOverlay.show();
       }
       if (state.data != null) {
         eventController.removeWhere((e) => true);
@@ -90,6 +76,8 @@ class CalendarMonthView extends StatelessWidget {
 
         eventController.addAll(newEvents);
       }
+
+      context.loaderOverlay.hide();
     });
 
     return MonthView(
