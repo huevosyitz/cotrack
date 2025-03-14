@@ -80,7 +80,7 @@ class TransactionCategoryRepository {
   Future<void> addTransactionCategory(
       TransactionCategory transactionCategory) async {
     await supaClient
-        .from("transaction_categories")
-        .upsert(transactionCategory.toMap());
+        .from("categories")
+        .insert(transactionCategory.toMap()..remove("id"));
   }
 }

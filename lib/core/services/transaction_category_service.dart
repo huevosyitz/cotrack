@@ -48,4 +48,36 @@ class TransactionCategoryService {
     return Query(
         key: queryKey, queryFn: setupTransactionCategories, initialData: []);
   }
+
+  Mutation<void, TransactionCategory> addTransactionCategoryMutation() {
+    // Create transaction mutation
+
+    return Mutation(
+      key: "addTransactionCategory",
+      refetchQueries: [queryKey],
+      queryFn: addTransactionCategory,
+      onStartMutation: (transaction) {
+        final queryObject = CachedQuery.instance.getQuery(queryKey);
+
+        if (queryObject != null) {
+          final query = queryObject as Query<List<TransactionCategory>>;
+          final fallback = query.state.data;
+
+          // optimistically set the data
+          query.update((oldData) => [...?oldData, transaction]);
+
+          // return the previous data so that we can fallback to it if the
+          // mutation fails.
+          return fallback;
+        }
+
+        return [];
+      },
+      onError: (arg, error, fallback) {
+        CachedQuery.instance.updateQuery(
+            key: queryKey,
+            updateFn: (_) => fallback as List<TransactionCategory>);
+      },
+    );
+  }
 }
