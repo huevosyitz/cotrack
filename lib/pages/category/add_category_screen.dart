@@ -13,7 +13,20 @@ import 'package:watch_it/watch_it.dart';
 class AddCategoryScreen extends StatelessWidget {
   final _formKey = GlobalKey<FormBuilderState>();
   final ValueNotifier<bool> _isFormValid = ValueNotifier(false);
-  AddCategoryScreen({super.key});
+  late bool _isEdit = false;
+  final TransactionCategory? categoryToEdit;
+
+  AddCategoryScreen({super.key, this.categoryToEdit}) {
+    if (categoryToEdit != null) {
+      _formKey.currentState?.patchValue({
+        'categoryName': categoryToEdit?.name,
+        'type': categoryToEdit?.transactionType.name,
+        'icon': categoryToEdit?.iconItem,
+      });
+
+      _isEdit = true;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -135,8 +148,7 @@ class AddCategoryScreen extends StatelessWidget {
                               name: name,
                               transactionType: TransactionType.values
                                   .firstWhere((a) => a.name == type),
-                              iconData:
-                                  yIcons.iconMap[iconName] ?? yIcons.glance);
+                              iconItem: yIcons.getIconItem(iconName));
 
                           mutate(category);
                           Loggy.info("Created category: $category.$name!");

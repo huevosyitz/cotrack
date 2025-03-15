@@ -43,6 +43,18 @@ class TransactionCategoryService {
         key: queryKey, queryFn: setupTransactionCategories, initialData: []);
   }
 
+  Query<List<TransactionCategory>> getExpenseCategoriesQuery() {
+    // Get transactions for group
+
+    return Query(
+        key: queryKey,
+        queryFn: () async {
+          final data = await setupTransactionCategories();
+          return data.where((e) => e.transactionType == TransactionType.expense).toList();
+        },
+        initialData: []);
+  }
+
   Mutation<void, TransactionCategory> addTransactionCategoryMutation() {
     // Create transaction mutation
 

@@ -6,7 +6,6 @@ import 'package:cotrack/pages/transactions/transaction_modal_screen.dart';
 import 'package:cotrack/themes/themes.dart';
 import 'package:cotrack/utils/deviceUtils.dart';
 import 'package:flutter/material.dart';
-import 'package:gaimon/gaimon.dart';
 import 'package:pie_menu/pie_menu.dart';
 import 'package:watch_it/watch_it.dart';
 

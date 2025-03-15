@@ -30,7 +30,7 @@ class CategoryIconAvatar extends StatelessWidget {
             radius: avatarSize,
             backgroundColor: yColors.background2,
             child: Icon(
-              category.iconData,
+              category.iconItem.icon,
               color: context.primaryColor,
               size: iconSize,
             ),

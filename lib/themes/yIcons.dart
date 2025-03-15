@@ -1,3 +1,4 @@
+import 'package:cotrack/core/models/icon_item.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 
@@ -198,5 +199,25 @@ class yIcons {
     'umbrella': umbrella,
     'wrench': wrench,
     'glance': glance,
+    'add': add,
+    'delete': delete,
+    'edit': edit,
+    'sort': sort,
   };
+
+  // create a list of IconItem using the iconMap variable
+  static List<IconItem> get iconItems {
+    return iconMap.entries
+        .map((e) => IconItem(key: e.key, icon: e.value))
+        .toList();
+  }
+
+  static IconItem getIconItem(String key) {
+    var item = iconMap[key];
+    if (item == null) {
+      throw Exception('Icon key $key not found');
+    }
+
+    return IconItem(key: key, icon: item);
+  }
 }

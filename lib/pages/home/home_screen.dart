@@ -30,7 +30,7 @@ class HomeScreen extends HookWidget {
               child: QueryBuilder(
                   query: di
                       .get<TransactionCategoryService>()
-                      .getTransactionCategoriesQuery(),
+                      .getExpenseCategoriesQuery(),
                   builder: (context, state) {
                     if (state.isLoading) {
                       return const Center(
@@ -85,7 +85,7 @@ class _CategoryGridWrapperState extends State<CategoryGridWrapper> {
       id: 0,
       name: "Add",
       transactionType: TransactionType.expense,
-      iconData: yIcons.add);
+      iconItem: yIcons.getIconItem("add"));
 
   @override
   void initState() {
