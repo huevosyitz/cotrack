@@ -85,9 +85,11 @@ class TransactionCategoryRepository {
         .insert(transactionCategory.toMap()..remove("id"));
   }
 
-  Future<void> editTransactionCategory(
-      TransactionCategory transactionCategory) async {
-    await supaClient.from(_tableName).update(transactionCategory.toMap());
+  Future<void> editTransactionCategory(TransactionCategory category) async {
+    await supaClient
+        .from(_tableName)
+        .update(category.toMap())
+        .eq("id", category.id);
   }
 
   Future<void> deleteTransactionCategory(int id) async {
