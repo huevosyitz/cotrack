@@ -1,3 +1,4 @@
+import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/models/transaction_type.dart';
@@ -18,12 +19,8 @@ class AddCategoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final categoryService = di.get<TransactionCategoryService>();
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: const Text('Add New Category'),
-        ),
+      appBar: AppBar(
+        title: const Text('Add New Category'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16),
@@ -101,56 +98,56 @@ class AddCategoryScreen extends StatelessWidget {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 50, top: 10),
-              child: ValueListenableBuilder(
-                valueListenable: _isFormValid,
-                builder: (context, value, child) => MutationBuilder(
-                    mutation: categoryService.addTransactionCategoryMutation(),
-                    builder: (context, state, mutate) {
-                      return MaterialButton(
-                        color: context.colorScheme.primary,
-                        minWidth: double.infinity,
-                        disabledColor:
-                            context.colorScheme.primary.withValues(alpha: .5),
-                        onPressed: value
-                            ? () async {
-                                if (_formKey.currentState?.saveAndValidate() ??
-                                    false) {
-                                  // Save the form
-
-                                  logger.d(_formKey.currentState?.value);
-
-                                  final name = _formKey
-                                      .currentState?.value['categoryName'];
-                                  final type =
-                                      _formKey.currentState?.value['type'];
-                                  final iconName =
-                                      _formKey.currentState?.value['icon'];
-
-                                  final category = TransactionCategory(
-                                      id: 0,
-                                      name: name,
-                                      transactionType: TransactionType.values
-                                          .firstWhere((a) => a.name == type),
-                                      iconData: yIcons.iconMap[iconName] ??
-                                          yIcons.glance);
-
-                                  mutate(category);
-                                  Loggy.info(
-                                      "Created category: $category.$name!");
-
-                                  CupertinoSheetRoute.popSheet(context);
-                                }
-                              }
-                            : null,
-                        child: const Text('Save'),
-                      );
-                    }),
-              ),
-            )
+            SaveButton(categoryService)
           ],
         ),
+      ),
+    );
+  }
+
+  Padding SaveButton(TransactionCategoryService categoryService) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: ValueListenableBuilder(
+        valueListenable: _isFormValid,
+        builder: (context, value, child) => MutationBuilder(
+            mutation: categoryService.addTransactionCategoryMutation(),
+            builder: (context, state, mutate) {
+              return MaterialButton(
+                color: context.colorScheme.primary,
+                minWidth: double.infinity,
+                disabledColor:
+                    context.colorScheme.primary.withValues(alpha: .5),
+                onPressed: value
+                    ? () async {
+                        if (_formKey.currentState?.saveAndValidate() ?? false) {
+                          // Save the form
+
+                          logger.d(_formKey.currentState?.value);
+
+                          final name =
+                              _formKey.currentState?.value['categoryName'];
+                          final type = _formKey.currentState?.value['type'];
+                          final iconName = _formKey.currentState?.value['icon'];
+
+                          final category = TransactionCategory(
+                              id: 0,
+                              name: name,
+                              transactionType: TransactionType.values
+                                  .firstWhere((a) => a.name == type),
+                              iconData:
+                                  yIcons.iconMap[iconName] ?? yIcons.glance);
+
+                          mutate(category);
+                          Loggy.info("Created category: $category.$name!");
+
+                          context.pop();
+                        }
+                      }
+                    : null,
+                child: const Text('Save'),
+              );
+            }),
       ),
     );
   }

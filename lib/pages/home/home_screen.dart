@@ -7,10 +7,10 @@ import 'package:cotrack/pages/transactions/transaction_modal_screen.dart';
 import 'package:cotrack/pages/category/add_category_screen.dart';
 import 'package:cotrack/themes/themes.dart';
 import 'package:cotrack/utils/extensions.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:reorderables/reorderables.dart';
+import 'package:gaimon/gaimon.dart';
+import 'package:pie_menu/pie_menu.dart';
 import 'package:watch_it/watch_it.dart';
 
 class HomeScreen extends HookWidget {
@@ -18,46 +18,56 @@ class HomeScreen extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
-            child: QueryBuilder(
-                query: di
-                    .get<TransactionCategoryService>()
-                    .getTransactionCategoriesQuery(),
-                builder: (context, state) {
-                  if (state.isLoading) {
-                    return const Center(
-                        child: SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator()));
-                  }
+    return PieCanvas(
+      theme: PieTheme(
+          rightClickShowsMenu: true,
+          overlayColor: yColors.background.withOpacity(0.5),
+          buttonTheme: PieButtonTheme(
+              backgroundColor: yColors.primary,
+              iconColor: yColors.primaryText)),
+      child: Scaffold(
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: SingleChildScrollView(
+              child: QueryBuilder(
+                  query: di
+                      .get<TransactionCategoryService>()
+                      .getTransactionCategoriesQuery(),
+                  builder: (context, state) {
+                    if (state.isLoading) {
+                      return const Center(
+                          child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator()));
+                    }
 
-                  if (state.isError) {
-                    return Center(
-                      child: Text(
-                        'Error: ${state.error}',
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                    );
-                  }
+                    if (state.isError) {
+                      return Center(
+                        child: Text(
+                          'Error: ${state.error}',
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      );
+                    }
 
-                  return CategoryGridWrapper(
-                      categories: state.data as List<TransactionCategory>);
-                })),
-      ),
-      floatingActionButton: FloatingActionButton(
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(99)),
+                    return CategoryGridWrapper(
+                        categories: state.data as List<TransactionCategory>);
+                  })),
         ),
-        onPressed: () {
-          showCupertinoSheet(
-              context: context,
-              pageBuilder: (context) => TransactionModelScreen());
-        },
-        child: const Icon(yIcons.add),
+        floatingActionButton: FloatingActionButton(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(99)),
+          ),
+          onPressed: () {
+            showModalBottomSheet(
+                isScrollControlled: true,
+                enableDrag: true,
+                context: context,
+                builder: (context) => TransactionModelScreen());
+          },
+          child: const Icon(yIcons.add),
+        ),
       ),
     );
   }
@@ -82,28 +92,71 @@ class _CategoryGridWrapperState extends State<CategoryGridWrapper> {
   @override
   void initState() {
     super.initState();
-    widget.categories.add(addCategoryItem);
+    final categoryService = di.get<TransactionCategoryService>();
 
-    categoryWidgets = widget.categories
-        .map((TransactionCategory category) => CategoryIconAvatar(
-              avatarSize: 30,
-              iconSize: 30,
-              category: category,
-              showLabel: true,
-              onPressed: () {
-                if (category.name == "Add") {
-                  showCupertinoSheet(
-                      context: context,
-                      pageBuilder: (context) => AddCategoryScreen());
-                  return;
+    final categoryItems = [...widget.categories, addCategoryItem];
+
+    categoryWidgets = categoryItems
+        .map((TransactionCategory category) => PieMenu(
+              onToggle: (menuOpen) async {
+                logger.d("Menu open: $menuOpen");
+
+                final supportsHaptic = await Gaimon.canSupportsHaptic;
+                logger.i("Supports haptic: $supportsHaptic");
+                if (supportsHaptic) {
+                  Gaimon.selection();
                 }
-
-                showCupertinoSheet(
-                    context: context,
-                    pageBuilder: (context) => TransactionModelScreen(
-                          category: category,
-                        ));
               },
+              actions: [
+                PieAction(
+                  tooltip: const Text(''),
+                  onSelect: () => categoryService
+                      .editTransactionCategoryMutation()
+                      .mutate(category),
+
+                  /// Optical correction
+                  child: const Padding(
+                    padding: EdgeInsets.only(left: 4),
+                    child: Icon(yIcons.edit),
+                  ),
+                ),
+                PieAction(
+                  tooltip: const Text(''),
+                  onSelect: () => categoryService
+                      .deleteTransactionCategoryMutation()
+                      .mutate(category.id),
+                  child: Icon(yIcons.delete),
+                ),
+                PieAction(
+                  tooltip: const Text(''),
+                  onSelect: () => {},
+                  child: Icon(yIcons.sort),
+                ),
+              ],
+              child: CategoryIconAvatar(
+                avatarSize: 30,
+                iconSize: 30,
+                category: category,
+                showLabel: true,
+                onPressed: () {
+                  if (category.name == "Add") {
+                    showModalBottomSheet(
+                        isScrollControlled: true,
+                        enableDrag: true,
+                        context: context,
+                        builder: (context) => AddCategoryScreen());
+                    return;
+                  }
+
+                  showModalBottomSheet(
+                      isScrollControlled: true,
+                      enableDrag: true,
+                      context: context,
+                      builder: (context) => TransactionModelScreen(
+                            category: category,
+                          ));
+                },
+              ),
             ))
         .toList();
   }
@@ -117,15 +170,24 @@ class _CategoryGridWrapperState extends State<CategoryGridWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    var wrap = ReorderableWrap(
-      spacing: 22.0,
-      runSpacing: 22.0,
+    // var wrap = ReorderableWrap(
+    //   spacing: 22.0,
+    //   runSpacing: 22.0,
+    //   crossAxisAlignment: WrapCrossAlignment.center,
+    //   alignment: WrapAlignment.start,
+    //   onReorder: _onReorder,
+    //   children: categoryWidgets,
+    // );
+
+    // return wrap;
+
+    var wrap = Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
       alignment: WrapAlignment.start,
-      onReorder: _onReorder,
+      runSpacing: 20,
       children: categoryWidgets,
     );
 
-    return SizedBox(width: context.width, child: wrap);
+    return SizedBox(width: context.width, height: context.height, child: wrap);
   }
 }
