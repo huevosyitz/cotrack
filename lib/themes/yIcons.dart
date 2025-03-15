@@ -116,6 +116,7 @@ class yIcons {
   static const umbrella = FluentIcons.umbrella_24_regular;
   static const wrench = FluentIcons.wrench_24_regular;
   static const glance = FluentIcons.glance_24_regular;
+  static const sports = FluentIcons.sport_24_regular;
 
   static const Map<String, IconData> iconMap = {
     'home': home,
@@ -199,6 +200,7 @@ class yIcons {
     'umbrella': umbrella,
     'wrench': wrench,
     'glance': glance,
+    'sports': sports,
     'add': add,
     'delete': delete,
     'edit': edit,

@@ -1,7 +1,7 @@
 import 'package:cotrack/components/components.dart';
 import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
-import 'package:cotrack/pages/category/add_category_screen.dart';
+import 'package:cotrack/pages/category/add_edit_category_screen.dart';
 import 'package:cotrack/pages/transactions/transaction_modal_screen.dart';
 import 'package:cotrack/themes/themes.dart';
 import 'package:cotrack/utils/deviceUtils.dart';
@@ -22,6 +22,24 @@ class CategoryActionMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // id 0 is just the add category button. no context menu for this button
+    if (category.id == 0) {
+      return CategoryIconAvatar(
+        avatarSize: 30,
+        iconSize: 30,
+        category: category,
+        showLabel: true,
+        onPressed: () {
+          showModalBottomSheet(
+              isScrollControlled: true,
+              enableDrag: true,
+              context: context,
+              builder: (context) => AddEditCategoryScreen());
+          return;
+        },
+      );
+    }
+
     return PieMenu(
       onToggle: (menuOpen) async {
         await HapticUtil.vibrate(level: HapticLevel.heavy);
@@ -29,9 +47,12 @@ class CategoryActionMenu extends StatelessWidget {
       actions: [
         PieAction(
           tooltip: const Text(''),
-          onSelect: () => categoryService
-              .editTransactionCategoryMutation()
-              .mutate(category),
+          onSelect: () => showModalBottomSheet(
+            isScrollControlled: true,
+            enableDrag: true,
+            context: context,
+            builder: (context) => AddEditCategoryScreen(categoryToEdit: category),
+          ),
 
           /// Optical correction
           child: const Padding(
@@ -58,15 +79,6 @@ class CategoryActionMenu extends StatelessWidget {
         category: category,
         showLabel: true,
         onPressed: () {
-          if (category.name == "Add") {
-            showModalBottomSheet(
-                isScrollControlled: true,
-                enableDrag: true,
-                context: context,
-                builder: (context) => AddCategoryScreen());
-            return;
-          }
-
           showModalBottomSheet(
               isScrollControlled: true,
               enableDrag: true,

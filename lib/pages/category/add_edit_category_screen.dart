@@ -1,27 +1,25 @@
 import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:cotrack/core/models/models.dart';
-import 'package:cotrack/core/models/transaction_type.dart';
 import 'package:cotrack/core/services/services.dart';
 import 'package:cotrack/themes/themes.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:watch_it/watch_it.dart';
 
-class AddCategoryScreen extends StatelessWidget {
+class AddEditCategoryScreen extends StatelessWidget {
   final _formKey = GlobalKey<FormBuilderState>();
   final ValueNotifier<bool> _isFormValid = ValueNotifier(false);
   late bool _isEdit = false;
   final TransactionCategory? categoryToEdit;
 
-  AddCategoryScreen({super.key, this.categoryToEdit}) {
+  AddEditCategoryScreen({super.key, this.categoryToEdit}) {
     if (categoryToEdit != null) {
       _formKey.currentState?.patchValue({
         'categoryName': categoryToEdit?.name,
         'type': categoryToEdit?.transactionType.name,
-        'icon': categoryToEdit?.iconItem,
+        'icon': categoryToEdit?.iconItem.key,
       });
 
       _isEdit = true;
@@ -33,7 +31,9 @@ class AddCategoryScreen extends StatelessWidget {
     final categoryService = di.get<TransactionCategoryService>();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add New Category'),
+        title: _isEdit
+            ? Text("Update '${categoryToEdit?.name}'")
+            : Text('Add New Category'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16),
@@ -53,6 +53,7 @@ class AddCategoryScreen extends StatelessWidget {
                     children: [
                       FormBuilderTextField(
                         name: 'categoryName',
+                        initialValue: _isEdit ? categoryToEdit?.name : null,
                         autofocus: true,
                         decoration: InputDecoration(
                             labelText: 'Category Name',
@@ -67,7 +68,9 @@ class AddCategoryScreen extends StatelessWidget {
                         name: 'type',
                         decoration:
                             const InputDecoration(labelText: 'Category Type'),
-                        initialValue: TransactionType.expense.name,
+                        initialValue: _isEdit
+                            ? categoryToEdit?.transactionType.name
+                            : TransactionType.expense.name,
                         spacing: 3,
                         options: const [
                           FormBuilderChipOption(value: "expense"),
@@ -84,7 +87,9 @@ class AddCategoryScreen extends StatelessWidget {
                       FormBuilderChoiceChip<dynamic>(
                         name: 'icon',
                         decoration: const InputDecoration(labelText: 'Icon'),
-                        initialValue: yIcons.iconMap.keys.first,
+                        initialValue: _isEdit
+                            ? categoryToEdit?.iconItem.key
+                            : yIcons.iconMap.keys.first,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         alignment: WrapAlignment.spaceBetween,
                         showCheckmark: false,
@@ -124,7 +129,9 @@ class AddCategoryScreen extends StatelessWidget {
       child: ValueListenableBuilder(
         valueListenable: _isFormValid,
         builder: (context, value, child) => MutationBuilder(
-            mutation: categoryService.addTransactionCategoryMutation(),
+            mutation: _isEdit
+                ? categoryService.editTransactionCategoryMutation()
+                : categoryService.addTransactionCategoryMutation(),
             builder: (context, state, mutate) {
               return MaterialButton(
                 color: context.colorScheme.primary,
@@ -141,19 +148,20 @@ class AddCategoryScreen extends StatelessWidget {
                           final name =
                               _formKey.currentState?.value['categoryName'];
                           final type = _formKey.currentState?.value['type'];
-                          final iconName = _formKey.currentState?.value['icon'];
+                          final iconKey = _formKey.currentState?.value['icon'];
 
                           final category = TransactionCategory(
-                              id: 0,
+                              id: _isEdit ? categoryToEdit?.id ?? 0 : 0,
                               name: name,
                               transactionType: TransactionType.values
                                   .firstWhere((a) => a.name == type),
-                              iconItem: yIcons.getIconItem(iconName));
+                              iconItem: yIcons.getIconItem(iconKey));
 
-                          mutate(category);
-                          Loggy.info("Created category: $category.$name!");
+                          await mutate(category);
+                          Loggy.info(
+                              "Created/Updated category: $category.$name!");
 
-                          context.pop();
+                          if (context.mounted) context.pop();
                         }
                       }
                     : null,
