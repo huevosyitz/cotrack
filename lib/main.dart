@@ -1,8 +1,5 @@
-import 'dart:io';
 import 'dart:ui';
 
-import 'package:cached_query_flutter/cached_query_flutter.dart';
-import 'package:cached_storage/cached_storage.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:cotrack/config/config.dart';
 import 'package:cotrack/config/data_init.dart';

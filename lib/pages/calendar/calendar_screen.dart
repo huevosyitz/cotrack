@@ -8,7 +8,7 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:watch_it/watch_it.dart';
 
 import 'package:cotrack/core/services/services.dart';
-import 'package:cotrack/pages/calendar/transaction_modal_screen.dart';
+import 'package:cotrack/pages/transactions/transaction_modal_screen.dart';
 import 'package:cotrack/themes/themes.dart';
 
 const List<String> months = [

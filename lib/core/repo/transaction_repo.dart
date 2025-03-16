@@ -2,6 +2,7 @@ import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/repo/transaction_category_repo.dart';
 
 class TransactionRepo {
+  final String _tableName = "transactions";
   Future<Transaction> createTransaction(Transaction transaction) async {
     // Create transaction
 
@@ -17,7 +18,7 @@ class TransactionRepo {
     // Update transaction
 
     var result = await supaClient
-        .from("transactions")
+        .from(_tableName)
         .update({
           "transaction_date": transaction.transaction_date,
           "amount": transaction.amount,
@@ -35,7 +36,7 @@ class TransactionRepo {
     // Delete transaction
 
     await supaClient
-        .from("transactions")
+        .from(_tableName)
         .delete()
         .eq("id", transaction.id)
         .select();
@@ -45,7 +46,7 @@ class TransactionRepo {
     // Get transactions
 
     var result =
-        await supaClient.from("transactions").select().eq("group_id", groupId);
+        await supaClient.from(_tableName).select().eq("group_id", groupId);
 
     return result.map((e) => Transaction.fromMap(e)).toList();
   }

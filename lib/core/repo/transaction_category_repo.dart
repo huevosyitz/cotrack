@@ -6,6 +6,7 @@ final supaClient = Supabase.instance.client;
 // convert list below to TransactionCategory object
 
 class TransactionCategoryRepository {
+  final String _tableName = "categories";
   Future<List<TransactionCategory>> getAllTransactionCategories() async {
     var list = await supaClient.from("categories").select();
 
@@ -80,7 +81,18 @@ class TransactionCategoryRepository {
   Future<void> addTransactionCategory(
       TransactionCategory transactionCategory) async {
     await supaClient
-        .from("transaction_categories")
-        .upsert(transactionCategory.toMap());
+        .from(_tableName)
+        .insert(transactionCategory.toMap()..remove("id"));
+  }
+
+  Future<void> editTransactionCategory(TransactionCategory category) async {
+    await supaClient
+        .from(_tableName)
+        .update(category.toMap())
+        .eq("id", category.id);
+  }
+
+  Future<void> deleteTransactionCategory(int id) async {
+    await supaClient.from(_tableName).delete().eq("id", id);
   }
 }

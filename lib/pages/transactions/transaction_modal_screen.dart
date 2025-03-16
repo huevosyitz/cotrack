@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import 'package:cotrack/core/models/models.dart';
@@ -36,17 +37,10 @@ class TransactionModelScreen extends WatchingWidget {
     // );
 
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(56),
-        child: Padding(
+      appBar: AppBar(
+        title: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(children: [
-            IconButton(
-              icon: const Icon(yIcons.leftArrow),
-              onPressed: () {
-                CupertinoSheetRoute.popSheet(context);
-              },
-            ),
             SegmentedButton<TransactionType>(
               segments: const <ButtonSegment<TransactionType>>[
                 ButtonSegment<TransactionType>(
@@ -66,7 +60,7 @@ class TransactionModelScreen extends WatchingWidget {
               },
             ),
           ]),
-        ), 
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -214,8 +208,7 @@ class TransactionModelScreen extends WatchingWidget {
 
                                       Loggy.info("Created transaction: $tran");
 
-                                      // if (context.mounted) context.pop();
-                                      CupertinoSheetRoute.popSheet(context);
+                                      if (context.mounted) context.pop();
                                     }
                                   },
                             child: snapshot.isLoading
