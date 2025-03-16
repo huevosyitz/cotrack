@@ -119,10 +119,11 @@ class _CategoryGridWrapperState extends State<CategoryGridWrapper> {
 
     // return wrap;
 
-    var wrap = Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      alignment: WrapAlignment.start,
-      runSpacing: 20,
+    var wrap = GridView.count(
+      crossAxisCount: 5,
+      scrollDirection: Axis.vertical,
+      mainAxisSpacing: 24,
+      padding: EdgeInsets.all(8),
       children: categoryWidgets,
     );
 

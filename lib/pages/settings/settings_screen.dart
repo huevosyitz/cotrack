@@ -1,4 +1,5 @@
 import 'package:awesome_extensions/awesome_extensions.dart';
+import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:cotrack/components/show_confirmation_modal.dart';
 import 'package:cotrack/core/services/services.dart';
 import 'package:cotrack/core/state/app_state.dart';
@@ -80,6 +81,17 @@ class SettingsScreen extends WatchingWidget {
                           cancelText: "Cancel",
                           confirmText: "Logout",
                           headerText: "Confirm Logout");
+                    }),
+                    _listRouteTile(context, "Clear Cache", yIcons.broom, "",
+                        onTap: () {
+                      showConfirmationModal(context,
+                          "Are you sure you want to clear all cached data?",
+                          () async {
+                        CachedQuery.instance.deleteCache();
+                      },
+                          cancelText: "Cancel",
+                          confirmText: "Clear",
+                          headerText: "Confirm Clear Cache");
                     }),
                   ],
                 ),

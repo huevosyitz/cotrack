@@ -37,6 +37,7 @@ class yIcons {
   static const delete = FluentIcons.delete_24_regular;
   static const edit = FluentIcons.edit_24_regular;
   static const sort = FluentIcons.arrow_sort_24_regular;
+  static const broom = FluentIcons.broom_24_regular;
 
   // nav
   static const arrowRight = FluentIcons.arrow_right_24_regular;

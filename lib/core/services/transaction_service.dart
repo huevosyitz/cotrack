@@ -2,6 +2,7 @@ import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/repo/transaction_repo.dart';
 import 'package:cotrack/core/services/services.dart';
+import 'package:intl/intl.dart';
 
 class TransactionService {
   final TransactionRepo _transactionRepo;
@@ -37,6 +38,23 @@ class TransactionService {
     return _transactionRepo.getTransactionsForGroup(user.groupId);
   }
 
+  Query<List<Transaction>> getTransactionsForDateQuery(DateTime date) {
+    // Get transactions for date
+
+    return Query(
+        key: "$queryKey/${DateFormat('yyyy-MM-dd').format(date)}",
+        queryFn: () async {
+          final transactions = await getAllMyTransactions();
+          return transactions
+              .where((t) =>
+                  t.transaction_date.year == date.year &&
+                  t.transaction_date.month == date.month &&
+                  t.transaction_date.day == date.day)
+              .toList();
+        },
+        initialData: []);
+  }
+
   Query<List<Transaction>> getAllMyTransactionsQuery() {
     // Get transactions for group
 
@@ -48,7 +66,7 @@ class TransactionService {
 
     return Mutation(
       key: "createTransaction",
-      refetchQueries: [queryKey],
+      invalidateQueries: [queryKey],
       queryFn: createTransaction,
       onStartMutation: (transaction) {
         final queryObject = CachedQuery.instance.getQuery(queryKey);
@@ -70,6 +88,15 @@ class TransactionService {
       onError: (arg, error, fallback) {
         CachedQuery.instance.updateQuery(
             key: queryKey, updateFn: (_) => fallback as List<Transaction>);
+      },
+      onSuccess: (res, arg) {
+        CachedQuery.instance
+            .whereQuery((q) =>
+                q.key ==
+                "$queryKey/${DateFormat('yyyy-MM-dd').format(res.transaction_date)}")
+            ?.forEach((q) {
+          q.invalidateQuery();
+        });
       },
     );
   }
@@ -96,6 +123,15 @@ class TransactionService {
         Loggy.error("Error deleting transaction: $error");
         CachedQuery.instance.updateQuery(
             key: queryKey, updateFn: (_) => fallback as List<Transaction>);
+      },
+      onSuccess: (res, arg) {
+        CachedQuery.instance
+            .whereQuery((q) =>
+                q.key ==
+                "$queryKey/${DateFormat('yyyy-MM-dd').format(arg.transaction_date)}")
+            ?.forEach((q) {
+          q.invalidateQuery();
+        });
       },
     );
   }

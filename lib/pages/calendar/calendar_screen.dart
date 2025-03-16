@@ -2,7 +2,8 @@ import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:cotrack/core/models/models.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cotrack/pages/pages.dart';
+import 'package:cotrack/pages/transactions/daily_transactions_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:watch_it/watch_it.dart';
@@ -29,27 +30,17 @@ const List<String> months = [
 const List<String> weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 class CalendarScreen extends StatelessWidget {
-  const CalendarScreen({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(body: CalendarMonthView());
-  }
-}
-
-class CalendarMonthView extends StatelessWidget {
   final EventController eventController = EventController();
   final monthState = GlobalKey<MonthViewState>();
 
-  CalendarMonthView({
+  CalendarScreen({
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    final q = di.get<TransactionService>().getAllMyTransactionsQuery();
+    final transactionService = di.get<TransactionService>();
+    final q = transactionService.getAllMyTransactionsQuery();
     final categoryService = di.get<TransactionCategoryService>();
 
     q.stream.listen((state) {
@@ -102,56 +93,83 @@ class CalendarMonthView extends StatelessWidget {
             .map((e) => e.amount)
             .fold(0.0, (value, element) => value + element);
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CircleAvatar(
-              maxRadius: 10,
-              backgroundColor: isToday ? context.primaryColor : context.surface,
-              child: Text(
-                date.day.toString(),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isInMonth
-                      ? (isToday
-                          ? context.colorScheme.onPrimary
-                          : context.colorScheme.onSurface)
-                      : Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: .2),
-                ),
-              ),
-            ),
-            if (events.isNotEmpty)
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 20, left: 8, right: 8),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (expenseAmount > 0)
-                        Text(
-                          expenseAmount.toString(),
-                          style: TextStyle(
-                            color: yColors.warn,
-                            fontSize: 12,
-                          ),
-                        ),
-                      if (incomeAmount > 0)
-                        Text(
-                          incomeAmount.toString(),
-                          style: TextStyle(
-                            color: yColors.primary,
-                            fontSize: 12,
-                          ),
-                        ),
-                    ],
+        return GestureDetector(
+          onDoubleTap: () {
+            showModalBottomSheet(
+                isScrollControlled: true,
+                enableDrag: true,
+                context: context,
+                builder: (context) => TransactionModelScreen(
+                      date: date,
+                    ));
+          },
+          onTap: () => showModalBottomSheet(
+              isScrollControlled: true,
+              enableDrag: true,
+              context: context,
+              builder: (context) => DailyTransactionsScreen(
+                    date: date,
+                    transactionService: transactionService,
+                  )),
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(),
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  maxRadius: 10,
+                  backgroundColor:
+                      isToday ? context.primaryColor : context.surface,
+                  child: Text(
+                    date.day.toString(),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isInMonth
+                          ? (isToday
+                              ? context.colorScheme.onPrimary
+                              : context.colorScheme.onSurface)
+                          : Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: .2),
+                    ),
                   ),
                 ),
-              )
-          ],
+                if (events.isNotEmpty)
+                  Expanded(
+                    child: Padding(
+                      padding:
+                          const EdgeInsets.only(top: 20, left: 8, right: 8),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (expenseAmount > 0)
+                            Text(
+                              expenseAmount.toString(),
+                              style: TextStyle(
+                                color: yColors.warn,
+                                fontSize: 12,
+                              ),
+                            ),
+                          if (incomeAmount > 0)
+                            Text(
+                              incomeAmount.toString(),
+                              style: TextStyle(
+                                color: yColors.primary,
+                                fontSize: 12,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  )
+              ],
+            ),
+          ),
         );
 
         // // Return your widget to display as month cell.
@@ -225,32 +243,34 @@ class CalendarMonthView extends StatelessWidget {
       initialMonth: DateTime.now(),
       cellAspectRatio: 1,
       onPageChange: (date, pageIndex) => print("$date, $pageIndex"),
-      onCellTap: (events, date) async {
-        // Implement callback when user taps on a cell.
-        print(date);
+      // onCellTap: (events, date) async {
+      //   // Implement callback when user taps on a cell.
+      //   print(date);
 
-        showCupertinoSheet(
-            context: context,
-            pageBuilder: (context) => TransactionModelScreen(
-                  date: date,
-                ));
+      // showModalBottomSheet(
+      //     isScrollControlled: true,
+      //     enableDrag: true,
+      //     context: context,
+      //     builder: (context) => TransactionModelScreen(
+      //           date: date,
+      //         ));
 
-        // var result = await showCupertinoModalBottomSheet(
-        //     expand: true,
-        //     isDismissible: false,
-        //     useRootNavigator: true,
-        //     context: context,
-        //     backgroundColor: Colors.transparent,
-        //     builder: (context) => TransactionModelScreen(
-        //           date: date,
-        //         ));
-      },
+      // var result = await showCupertinoModalBottomSheet(
+      //     expand: true,
+      //     isDismissible: false,
+      //     useRootNavigator: true,
+      //     context: context,
+      //     backgroundColor: Colors.transparent,
+      //     builder: (context) => TransactionModelScreen(
+      //           date: date,
+      //         ));
+      // },
       startDay: WeekDays.sunday, // To change the first day of the week.
       // This callback will only work if cellBuilder is null.
-      onEventTap: (event, date) => print(event),
-      onEventDoubleTap: (events, date) => print(events),
-      onEventLongTap: (event, date) => print(event),
-      onDateLongPress: (date) => print(date),
+      onEventTap: (event, date) => print("tap $event"),
+      onEventDoubleTap: (events, date) => print("doubletap $events"),
+      onEventLongTap: (event, date) => print("longtap $event"),
+      onDateLongPress: (date) => print("longpress $date"),
       // headerBuilder: MonthHeader.hidden, // To hide month header
       showWeekTileBorder: false, // To show or hide header border
     );
