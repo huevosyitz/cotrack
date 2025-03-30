@@ -18,6 +18,7 @@ class DailyTransactionsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final categoryService = di.get<TransactionCategoryService>();
     return Scaffold(
       appBar: AppBar(
         title: Text(DateFormat('yyyy-MMM-dd').format(date)),
@@ -77,25 +78,58 @@ class DailyTransactionsScreen extends StatelessWidget {
                     ],
                   ),
                   child: ListTile(
-                    leading: CircleAvatar(
-                      radius: 25,
-                      backgroundColor: yColors.background2,
-                      child: Icon(
-                        TransactionCategoryService
-                            .transactionCategoriesMap[
-                                transactionList[index].category_id]!
-                            .iconItem
-                            .icon,
-                        color: context.primaryColor,
-                        size: 25,
+                    minLeadingWidth: 60,
+                    leading: SizedBox(
+                      width: 60,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Icon(
+                          //   TransactionCategoryService
+                          //       .transactionCategoriesMap[
+                          //           transactionList[index].category_id]!
+                          //       .iconItem
+                          //       .icon,
+                          //   color: context.primaryColor,
+                          //   size: 25,
+                          // ),
+                          Text(
+                            TransactionCategoryService
+                                .transactionCategoriesMap[
+                                    transactionList[index].category_id]!
+                                .name,
+                            style: context.labelSmall!
+                                .copyWith(color: yColors.primaryTextFade1),
+                          )
+                        ],
                       ),
                     ),
-                    title: Text(TransactionCategoryService
-                            .transactionCategoriesMap[
-                                transactionList[index].category_id]
-                            ?.name ??
-                        "Unknown"),
-                    subtitle: Text(transactionList[index].amount.toString()),
+                    title: (transactionList[index].notes ?? "").isEmpty
+                        ? Text(
+                            TransactionCategoryService
+                                .transactionCategoriesMap[
+                                    transactionList[index].category_id]!
+                                .name,
+                            style: TextStyle(color: yColors.primaryTextFade2))
+                        : Text(transactionList[index]!.notes!),
+                    subtitle: Text(
+                      TransactionAccountService
+                              .transactionAccountsMap[
+                                  transactionList[index].account_id]
+                              ?.name ??
+                          "Unknown",
+                      style: context.labelSmall!
+                          .copyWith(color: yColors.primaryTextFade1),
+                    ),
+                    trailing: Text(
+                      "₱ ${transactionList[index].amount}",
+                      style: context.labelSmall!.copyWith(
+                          color: categoryService.isIncomeCategory(
+                                  transactionList[index].category_id)
+                              ? yColors.primary
+                              : yColors.warn),
+                    ),
                   ),
                 );
               },
