@@ -1,5 +1,7 @@
 import 'package:cotrack/core/models/models.dart';
-import 'package:cotrack/core/repo/transaction_category_repo.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+final _supaClient = Supabase.instance.client;
 
 class TransactionRepo {
   final String _tableName = "transactions";
@@ -9,7 +11,7 @@ class TransactionRepo {
     var tran = transaction.toMap()..remove("id");
 
     var result =
-        await supaClient.from("transactions").insert(tran).select().single();
+        await _supaClient.from("transactions").insert(tran).select().single();
 
     return Transaction.fromMap(result);
   }
@@ -17,7 +19,7 @@ class TransactionRepo {
   Future<Transaction> updateTransaction(Transaction transaction) async {
     // Update transaction
 
-    var result = await supaClient
+    var result = await _supaClient
         .from(_tableName)
         .update({
           "transaction_date": transaction.transaction_date,
@@ -35,7 +37,7 @@ class TransactionRepo {
   Future<void> deleteTransaction(Transaction transaction) async {
     // Delete transaction
 
-    await supaClient
+    await _supaClient
         .from(_tableName)
         .delete()
         .eq("id", transaction.id)
@@ -46,7 +48,7 @@ class TransactionRepo {
     // Get transactions
 
     var result =
-        await supaClient.from(_tableName).select().eq("group_id", groupId);
+        await _supaClient.from(_tableName).select().eq("group_id", groupId);
 
     return result.map((e) => Transaction.fromMap(e)).toList();
   }

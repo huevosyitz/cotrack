@@ -34,9 +34,7 @@ class TransactionModelScreen extends WatchingWidget {
             ? TransactionCategoryService.incomeCategories
             : TransactionCategoryService.expenseCategories;
 
-    // return Scaffold(
-    //   body: Center(child: Text("HELLO"),),
-    // );
+    final allAccounts = TransactionAccountService.allAccounts;
 
     return Scaffold(
       appBar: AppBar(
@@ -130,15 +128,16 @@ class TransactionModelScreen extends WatchingWidget {
                       ]),
                     ),
                     FormBuilderChoiceChip<dynamic>(
-                      name: 'type',
+                      name: 'account',
                       decoration: const InputDecoration(labelText: 'Account'),
-                      initialValue: "Cash",
+                      initialValue: allAccounts.first.id,
                       spacing: 3,
-                      options: const [
-                        FormBuilderChipOption(value: "Cash"),
-                        FormBuilderChipOption(value: "Credit Card"),
-                        FormBuilderChipOption(value: "Debit Card"),
-                      ],
+                      options: allAccounts
+                          .map((account) => FormBuilderChipOption(
+                                value: account.id,
+                                child: Text(account.name),
+                              ))
+                          .toList(),
                       onChanged: (value) {
                         print(value);
                       },
@@ -193,15 +192,17 @@ class TransactionModelScreen extends WatchingWidget {
                                       }
 
                                       final transaction = Transaction(
-                                          id: 0,
-                                          created_at: DateTime.now(),
-                                          transaction_date: form["date"],
-                                          amount: double.parse(form["amount"]),
-                                          category_id: form["category_id"],
-                                          notes: form["notes"],
-                                          created_by: user.id,
-                                          updated_by: user.id,
-                                          group_id: user.groupId);
+                                        id: 0,
+                                        created_at: DateTime.now(),
+                                        transaction_date: form["date"],
+                                        amount: double.parse(form["amount"]),
+                                        category_id: form["category_id"],
+                                        notes: form["notes"],
+                                        created_by: user.id,
+                                        updated_by: user.id,
+                                        group_id: user.groupId,
+                                        account_id: form["account"],
+                                      );
 
                                       // var tran = await transactionService
                                       //     .createTransaction(transaction);

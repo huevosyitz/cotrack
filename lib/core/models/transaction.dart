@@ -12,6 +12,7 @@ class Transaction {
   final String created_by;
   final String updated_by;
   final int group_id;
+  final int account_id;
 
   Transaction({
     required this.id,
@@ -23,6 +24,7 @@ class Transaction {
     required this.created_by,
     required this.updated_by,
     required this.group_id,
+    required this.account_id,
   });
 
   Transaction copyWith({
@@ -35,6 +37,7 @@ class Transaction {
     String? created_by,
     String? updated_by,
     int? group_id,
+    int? account_id,
   }) {
     return Transaction(
       id: id ?? this.id,
@@ -46,6 +49,7 @@ class Transaction {
       created_by: created_by ?? this.created_by,
       updated_by: updated_by ?? this.updated_by,
       group_id: group_id ?? this.group_id,
+      account_id: account_id ?? this.account_id,
     );
   }
 
@@ -60,6 +64,7 @@ class Transaction {
       'created_by': created_by,
       'updated_by': updated_by,
       'group_id': group_id,
+      'account_id': account_id,
     };
   }
 
@@ -74,6 +79,7 @@ class Transaction {
       created_by: map['created_by'] ?? '',
       updated_by: map['updated_by'] ?? '',
       group_id: map['group_id']?.toInt() ?? 0,
+      account_id: map['account_id']?.toInt() ?? 0,
     );
   }
 
@@ -84,7 +90,7 @@ class Transaction {
 
   @override
   String toString() {
-    return 'Transaction(id: $id, created_at: $created_at, transaction_date: $transaction_date, amount: $amount, category_id: $category_id, notes: $notes, created_by: $created_by, updated_by: $updated_by, group_id: $group_id)';
+    return 'Transaction(id: $id, created_at: $created_at, transaction_date: $transaction_date, amount: $amount, category_id: $category_id, notes: $notes, created_by: $created_by, updated_by: $updated_by, group_id: $group_id, account_id: $account_id)';
   }
 
   @override
@@ -100,7 +106,8 @@ class Transaction {
         other.notes == notes &&
         other.created_by == created_by &&
         other.updated_by == updated_by &&
-        other.group_id == group_id;
+        other.group_id == group_id &&
+        other.account_id == account_id;
   }
 
   @override
@@ -113,6 +120,7 @@ class Transaction {
         notes.hashCode ^
         created_by.hashCode ^
         updated_by.hashCode ^
-        group_id.hashCode;
+        group_id.hashCode ^
+        account_id.hashCode;
   }
 }

@@ -6,13 +6,14 @@ class TransactionCategoryService {
   final TransactionCategoryRepository _transactionCategoryRepository;
   static List<TransactionCategory> expenseCategories = [];
   static List<TransactionCategory> incomeCategories = [];
+  static List<TransactionCategory> allCategories = [];
   static Map<int, TransactionCategory> transactionCategoriesMap = {};
   static final queryKey = "getTransactionCategories";
 
   TransactionCategoryService(this._transactionCategoryRepository);
 
-  Future<List<TransactionCategory>> setupTransactionCategories() async {
-    var allCategories =
+  Future<List<TransactionCategory>> getAllTransactionCategories() async {
+    allCategories =
         await _transactionCategoryRepository.getAllTransactionCategories();
     expenseCategories = allCategories
         .where((e) => e.transactionType == TransactionType.expense)
@@ -26,7 +27,7 @@ class TransactionCategoryService {
     return allCategories;
   }
 
-  Future<TransactionCategory> getTransactionCategoryById(String id) async {
+  Future<TransactionCategory> getTransactionCategoryById(int id) async {
     return await _transactionCategoryRepository.getTransactionCategoryById(id);
   }
 
@@ -44,7 +45,7 @@ class TransactionCategoryService {
     // Get transactions for group
 
     return Query(
-        key: queryKey, queryFn: setupTransactionCategories, initialData: []);
+        key: queryKey, queryFn: getAllTransactionCategories, initialData: []);
   }
 
   Query<List<TransactionCategory>> getExpenseCategoriesQuery() {
@@ -53,7 +54,7 @@ class TransactionCategoryService {
     return Query(
         key: queryKey,
         queryFn: () async {
-          final data = await setupTransactionCategories();
+          final data = await getAllTransactionCategories();
           return data
               .where((e) => e.transactionType == TransactionType.expense)
               .toList();
@@ -67,7 +68,7 @@ class TransactionCategoryService {
     return Query(
         key: queryKey,
         queryFn: () async {
-          final data = await setupTransactionCategories();
+          final data = await getAllTransactionCategories();
           return data
               .where((e) => e.transactionType == TransactionType.income)
               .toList();

@@ -7,7 +7,12 @@ import 'package:watch_it/watch_it.dart';
 
 class DataInit {
   static Future<void> init() async {
-    await di<TransactionCategoryService>().setupTransactionCategories();
+    var tasks = [
+      di<TransactionCategoryService>().getAllTransactionCategories(),
+      di<TransactionAccountService>().getAllTransactionAccounts()
+    ];
+
+    await Future.wait(tasks);
 
     // CachedQuery.instance.deleteCache();
 
