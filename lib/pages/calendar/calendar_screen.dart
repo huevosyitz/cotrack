@@ -107,9 +107,12 @@ class CalendarScreen extends StatelessWidget {
               isScrollControlled: true,
               enableDrag: true,
               context: context,
-              builder: (context) => DailyTransactionsScreen(
-                    date: date,
-                    transactionService: transactionService,
+              builder: (context) => FractionallySizedBox(
+                    heightFactor: 0.7,
+                    child: DailyTransactionsScreen(
+                      date: date,
+                      transactionService: transactionService,
+                    ),
                   )),
           child: Container(
             width: double.infinity,
