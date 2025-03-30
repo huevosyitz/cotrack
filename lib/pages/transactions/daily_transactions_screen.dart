@@ -13,37 +13,77 @@ import 'package:watch_it/watch_it.dart';
 class DailyTransactionsScreen extends StatelessWidget {
   final DateTime date;
   final TransactionService transactionService;
-  const DailyTransactionsScreen(
+  final ValueNotifier<double> _sumExpense = ValueNotifier(0);
+  final ValueNotifier<double> _sumIncome = ValueNotifier(0);
+
+  DailyTransactionsScreen(
       {super.key, required this.date, required this.transactionService});
 
   @override
   Widget build(BuildContext context) {
     final categoryService = di.get<TransactionCategoryService>();
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(DateFormat('yyyy-MMM-dd').format(date)),
-      ),
-      body: QueryBuilder(
-        query: transactionService.getTransactionsForDateQuery(date),
-        builder: (context, state) {
-          if (state.isLoading) {
-            return const Center(
-                child: SizedBox(
-                    width: 20, height: 20, child: CircularProgressIndicator()));
-          }
+    return QueryBuilder(
+      query: transactionService.getTransactionsForDateQuery(date),
+      builder: (context, state) {
+        if (state.isLoading) {
+          return const Center(
+              child: SizedBox(
+                  width: 20, height: 20, child: CircularProgressIndicator()));
+        }
 
-          if (state.isError) {
-            return Center(
-              child: Text(
-                'Error: ${state.error}',
-                style: const TextStyle(color: Colors.red),
-              ),
-            );
-          }
+        if (state.isError) {
+          return Center(
+            child: Text(
+              'Error: ${state.error}',
+              style: const TextStyle(color: Colors.red),
+            ),
+          );
+        }
 
-          var transactionList = state.data as List<Transaction>;
+        var transactionList = state.data as List<Transaction>;
 
-          return SlidableAutoCloseBehavior(
+        // Calculate sum of transaction list amounts
+        _sumExpense.value = transactionList.fold(0.0, (sum, item) {
+          return sum +
+              (categoryService.isExpenseCategory(item.category_id)
+                  ? item.amount
+                  : 0);
+        });
+
+        _sumIncome.value = transactionList.fold(0.0, (sum, item) {
+          return sum +
+              (categoryService.isIncomeCategory(item.category_id)
+                  ? item.amount
+                  : 0);
+        });
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(DateFormat('yyyy-MMM-dd').format(date)),
+                ValueListenableBuilder(
+                    valueListenable: _sumIncome,
+                    builder: (_, value, __) {
+                      return Text(
+                        "₱ ${value.toStringAsFixed(2)}",
+                        style:
+                            context.bodySmall!.copyWith(color: yColors.primary),
+                      );
+                    }),
+                ValueListenableBuilder(
+                    valueListenable: _sumExpense,
+                    builder: (_, value, __) {
+                      return Text(
+                        "₱ ${value.toStringAsFixed(2)}",
+                        style: context.bodySmall!.copyWith(color: yColors.warn),
+                      );
+                    })
+              ],
+            ),
+          ),
+          body: SlidableAutoCloseBehavior(
             child: ListView.builder(
               itemCount: transactionList.length,
               itemBuilder: (context, index) {
@@ -125,9 +165,9 @@ class DailyTransactionsScreen extends StatelessWidget {
                 );
               },
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

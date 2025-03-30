@@ -1,4 +1,5 @@
 import 'package:cotrack/core/models/models.dart';
+import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 final _supaClient = Supabase.instance.client;
@@ -49,6 +50,26 @@ class TransactionRepo {
 
     var result =
         await _supaClient.from(_tableName).select().eq("group_id", groupId);
+
+    return result.map((e) => Transaction.fromMap(e)).toList();
+  }
+
+  Future<List<Transaction>> getTransactionsForGroupForDay(
+      int groupId, DateTime date) async {
+    // Get transactions
+    // Format date to 'yyyy-MM-dd'
+    String formattedDate = DateFormat('yyyy-MM-dd').format(date);
+
+    // Define start and end timestamps for the given day
+    String startOfDay = "${formattedDate} 00:00:00.000Z";
+    String endOfDay = "${formattedDate} 23:59:59.999Z";
+
+    var result = await _supaClient
+        .from(_tableName)
+        .select()
+        .eq("group_id", groupId)
+        .gte('transaction_date', startOfDay)
+        .lt('transaction_date', endOfDay);
 
     return result.map((e) => Transaction.fromMap(e)).toList();
   }

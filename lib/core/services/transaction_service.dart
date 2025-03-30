@@ -38,13 +38,19 @@ class TransactionService {
     return _transactionRepo.getTransactionsForGroup(user.groupId);
   }
 
+  Future<List<Transaction>> getTransactionsForGroupForDay(DateTime date) async {
+    var user = await _userService.getCurrentUser();
+
+    return _transactionRepo.getTransactionsForGroupForDay(user.groupId, date);
+  }
+
   Query<List<Transaction>> getTransactionsForDateQuery(DateTime date) {
     // Get transactions for date
 
     return Query(
         key: _getDateQueryKey(date),
         queryFn: () async {
-          final transactions = await getAllMyTransactions();
+          final transactions = await getTransactionsForGroupForDay(date);
           return transactions
               .where((t) =>
                   t.transaction_date.year == date.year &&
