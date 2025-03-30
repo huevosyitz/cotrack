@@ -19,6 +19,7 @@ class DailyTransactionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final categoryService = di.get<TransactionCategoryService>();
+    final categoryService = di.get<TransactionCategoryService>();
     return Scaffold(
       appBar: AppBar(
         title: Text(DateFormat('yyyy-MMM-dd').format(date)),
@@ -95,6 +96,31 @@ class DailyTransactionsScreen extends StatelessWidget {
                           )
                         ],
                       ),
+                    ),
+                    title: (transactionList[index].notes ?? "").isEmpty
+                        ? Text(
+                            TransactionCategoryService
+                                .transactionCategoriesMap[
+                                    transactionList[index].category_id]!
+                                .name,
+                            style: TextStyle(color: yColors.primaryTextFade2))
+                        : Text(transactionList[index]!.notes!),
+                    subtitle: Text(
+                      TransactionAccountService
+                              .transactionAccountsMap[
+                                  transactionList[index].account_id]
+                              ?.name ??
+                          "Unknown",
+                      style: context.labelSmall!
+                          .copyWith(color: yColors.primaryTextFade1),
+                    ),
+                    trailing: Text(
+                      "₱ ${transactionList[index].amount}",
+                      style: context.labelSmall!.copyWith(
+                          color: categoryService.isIncomeCategory(
+                                  transactionList[index].category_id)
+                              ? yColors.primary
+                              : yColors.warn),
                     ),
                     title: (transactionList[index].notes ?? "").isEmpty
                         ? Text(
