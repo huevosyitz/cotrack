@@ -42,7 +42,7 @@ class TransactionService {
     // Get transactions for date
 
     return Query(
-        key: "$queryKey/${DateFormat('yyyy-MM-dd').format(date)}",
+        key: _getDateQueryKey(date),
         queryFn: () async {
           final transactions = await getAllMyTransactions();
           return transactions
@@ -91,9 +91,7 @@ class TransactionService {
       },
       onSuccess: (res, arg) {
         CachedQuery.instance
-            .whereQuery((q) =>
-                q.key ==
-                "$queryKey/${DateFormat('yyyy-MM-dd').format(res.transaction_date)}")
+            .whereQuery((q) => q.key == _getDateQueryKey(res.transaction_date))
             ?.forEach((q) {
           q.invalidateQuery();
         });
@@ -107,8 +105,9 @@ class TransactionService {
       invalidateQueries: [queryKey],
       queryFn: deleteTransaction,
       onStartMutation: (transaction) {
-        final query =
-            CachedQuery.instance.getQuery(queryKey) as Query<List<Transaction>>;
+        final query = CachedQuery.instance
+                .getQuery(_getDateQueryKey(transaction.transaction_date))
+            as Query<List<Transaction>>;
         final fallback = query.state.data;
 
         // optimistically set the data
@@ -126,13 +125,17 @@ class TransactionService {
       },
       onSuccess: (res, arg) {
         CachedQuery.instance
-            .whereQuery((q) =>
-                q.key ==
-                "$queryKey/${DateFormat('yyyy-MM-dd').format(arg.transaction_date)}")
+            .whereQuery((q) => q.key == _getDateQueryKey(arg.transaction_date))
             ?.forEach((q) {
           q.invalidateQuery();
         });
       },
     );
+  }
+
+  String _getDateQueryKey(DateTime date) {
+    // Get query key for date
+
+    return "$queryKey/${DateFormat('yyyy-MM-dd').format(date)}";
   }
 }
