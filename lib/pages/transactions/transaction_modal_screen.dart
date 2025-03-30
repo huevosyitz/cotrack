@@ -1,8 +1,6 @@
 import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:cotrack/core/state/app_state.dart';
-import 'package:cotrack/themes/themes.dart';
 import 'package:cotrack/utils/extensions.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -31,6 +29,10 @@ class TransactionModelScreen extends WatchingWidget {
     final transactionService = di.get<TransactionService>();
     final user = watchValue(((AppState s) => s.currentUser));
     final selectedType = watch(selectedCategoryType).value;
+    List<TransactionCategory> displayCategories =
+        selectedType == TransactionType.income
+            ? TransactionCategoryService.incomeCategories
+            : TransactionCategoryService.expenseCategories;
 
     // return Scaffold(
     //   body: Center(child: Text("HELLO"),),
@@ -114,7 +116,7 @@ class TransactionModelScreen extends WatchingWidget {
                       spacing: 3,
                       showCheckmark: false,
                       visualDensity: VisualDensity.compact,
-                      options: TransactionCategoryService.expenseCategories
+                      options: displayCategories
                           .map((category) => FormBuilderChipOption(
                                 value: category.id,
                                 child: Text(category.name),

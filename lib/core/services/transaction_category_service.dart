@@ -18,6 +18,10 @@ class TransactionCategoryService {
         .where((e) => e.transactionType == TransactionType.expense)
         .toList();
 
+    incomeCategories = allCategories
+        .where((e) => e.transactionType == TransactionType.income)
+        .toList();
+
     transactionCategoriesMap = {for (var v in allCategories) v.id: v};
     return allCategories;
   }
@@ -50,7 +54,23 @@ class TransactionCategoryService {
         key: queryKey,
         queryFn: () async {
           final data = await setupTransactionCategories();
-          return data.where((e) => e.transactionType == TransactionType.expense).toList();
+          return data
+              .where((e) => e.transactionType == TransactionType.expense)
+              .toList();
+        },
+        initialData: []);
+  }
+
+  Query<List<TransactionCategory>> getIncomeCategoriesQuery() {
+    // Get transactions for group
+
+    return Query(
+        key: queryKey,
+        queryFn: () async {
+          final data = await setupTransactionCategories();
+          return data
+              .where((e) => e.transactionType == TransactionType.income)
+              .toList();
         },
         initialData: []);
   }
