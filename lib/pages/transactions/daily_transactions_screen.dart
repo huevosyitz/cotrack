@@ -47,7 +47,7 @@ class DailyTransactionsScreen extends StatelessWidget {
                   // The end action pane is the one at the right or the bottom side.
                   endActionPane: ActionPane(
                     extentRatio: .4,
-                    motion: BehindMotion(),
+                    motion: StretchMotion(),
                     children: [
                       Theme(
                         data: Theme.of(context).copyWith(
@@ -68,7 +68,6 @@ class DailyTransactionsScreen extends StatelessWidget {
                                     context.colorScheme.onErrorContainer,
                                 icon: yIcons.delete,
                                 label: 'Delete',
-                                borderRadius: BorderRadius.circular(8),
                               );
                             }),
                       ),

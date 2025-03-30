@@ -116,14 +116,14 @@ class AddEditCategoryScreen extends StatelessWidget {
                 ),
               ),
             ),
-            SaveButton(categoryService)
+            saveButton(categoryService)
           ],
         ),
       ),
     );
   }
 
-  Padding SaveButton(TransactionCategoryService categoryService) {
+  Padding saveButton(TransactionCategoryService categoryService) {
     return Padding(
       padding: const EdgeInsets.only(top: 10),
       child: ValueListenableBuilder(

@@ -32,7 +32,7 @@ class HomeScreen extends HookWidget {
                       .get<TransactionCategoryService>()
                       .getExpenseCategoriesQuery(),
                   builder: (context, state) {
-                    if (state.isLoading) {
+                    if (state.isLoading || state.data == null) {
                       return const Center(
                           child: SizedBox(
                               width: 20,
@@ -122,8 +122,9 @@ class _CategoryGridWrapperState extends State<CategoryGridWrapper> {
     var wrap = GridView.count(
       crossAxisCount: 5,
       scrollDirection: Axis.vertical,
+      childAspectRatio: .8,
+      mainAxisSpacing: 8,
       padding: EdgeInsets.all(8),
-      childAspectRatio: 0.7,
       children: categoryWidgets,
     );
 

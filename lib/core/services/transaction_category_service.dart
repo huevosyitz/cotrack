@@ -122,8 +122,13 @@ class TransactionCategoryService {
           final fallback = query.state.data;
 
           // optimistically set the data
-          query.update((oldData) =>
-              [...?oldData?.where((a) => a.id != transaction.id), transaction]);
+          query.update((oldData) {
+            final itemToUpdateIdx =
+                oldData?.indexWhere((a) => a.id == transaction.id);
+            if (itemToUpdateIdx != null) {
+              oldData?[itemToUpdateIdx] = transaction;
+            }
+          });
 
           // return the previous data so that we can fallback to it if the
           // mutation fails.

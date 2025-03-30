@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:cotrack/core/models/icon_item.dart';
 import 'package:cotrack/core/models/transaction_type.dart';
 import 'package:cotrack/themes/themes.dart';
-import 'package:flutter/material.dart';
 
 class TransactionCategory {
   final int id;
