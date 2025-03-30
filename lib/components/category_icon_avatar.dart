@@ -36,18 +36,15 @@ class CategoryIconAvatar extends StatelessWidget {
             ),
           ),
           if (showLabel == true)
-            SizedBox(
-              width: 70,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 4.0),
-                child: Center(
-                  child: Text(
-                    category.name,
-                    style:
-                        context.bodySmall!.copyWith(color: context.textTheme.labelMedium!.color),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
+            Padding(
+              padding: const EdgeInsets.only(top: 4.0),
+              child: Center(
+                child: Text(
+                  category.name,
+                  style: context.bodySmall!
+                      .copyWith(color: context.textTheme.labelMedium!.color),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
               ),
             ),

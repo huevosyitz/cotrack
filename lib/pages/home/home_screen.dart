@@ -122,8 +122,8 @@ class _CategoryGridWrapperState extends State<CategoryGridWrapper> {
     var wrap = GridView.count(
       crossAxisCount: 5,
       scrollDirection: Axis.vertical,
-      mainAxisSpacing: 24,
       padding: EdgeInsets.all(8),
+      childAspectRatio: 0.7,
       children: categoryWidgets,
     );
 

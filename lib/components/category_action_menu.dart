@@ -51,7 +51,8 @@ class CategoryActionMenu extends StatelessWidget {
             isScrollControlled: true,
             enableDrag: true,
             context: context,
-            builder: (context) => AddEditCategoryScreen(categoryToEdit: category),
+            builder: (context) =>
+                AddEditCategoryScreen(categoryToEdit: category),
           ),
 
           /// Optical correction
