@@ -46,10 +46,8 @@ class CalendarScreen extends StatelessWidget {
     q.stream.listen((state) {
       if (state.status == QueryStatus.loading) {
         // show loading spinner
-
-        context.loaderOverlay.show();
-      }
-      if (state.data != null) {
+        if (context.mounted) context.loaderOverlay.show();
+      } else if (state.data != null) {
         eventController.removeWhere((e) => true);
         final transactionList = state.data as List<Transaction>;
 
@@ -66,9 +64,8 @@ class CalendarScreen extends StatelessWidget {
             .toList();
 
         eventController.addAll(newEvents);
+        if (context.mounted) context.loaderOverlay.hide();
       }
-
-      context.loaderOverlay.hide();
     });
 
     return MonthView(

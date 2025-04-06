@@ -143,7 +143,7 @@ class DailyTransactionsScreen extends StatelessWidget {
                                     transactionList[index].category_id]!
                                 .name,
                             style: TextStyle(color: yColors.primaryTextFade2))
-                        : Text(transactionList[index]!.notes!),
+                        : Text(transactionList[index].notes!),
                     subtitle: Text(
                       TransactionAccountService
                               .transactionAccountsMap[

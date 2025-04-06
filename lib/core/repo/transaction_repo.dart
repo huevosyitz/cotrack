@@ -61,8 +61,8 @@ class TransactionRepo {
     String formattedDate = DateFormat('yyyy-MM-dd').format(date);
 
     // Define start and end timestamps for the given day
-    String startOfDay = "${formattedDate} 00:00:00.000Z";
-    String endOfDay = "${formattedDate} 23:59:59.999Z";
+    String startOfDay = "$formattedDate 00:00:00.000Z";
+    String endOfDay = "$formattedDate 23:59:59.999Z";
 
     var result = await _supaClient
         .from(_tableName)

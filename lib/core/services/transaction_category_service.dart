@@ -129,6 +129,7 @@ class TransactionCategoryService {
             if (itemToUpdateIdx != null) {
               oldData?[itemToUpdateIdx] = transaction;
             }
+            return null;
           });
 
           // return the previous data so that we can fallback to it if the
