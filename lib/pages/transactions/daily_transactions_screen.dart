@@ -1,8 +1,9 @@
 import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:cached_query_flutter/cached_query_flutter.dart';
-import 'package:cotrack/components/components.dart';
+import 'package:calendar_view/calendar_view.dart';
 import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
+import 'package:cotrack/pages/transactions/add_edit_transaction_modal_screen.dart';
 import 'package:cotrack/themes/themes.dart';
 import 'package:cotrack/utils/extensions.dart';
 import 'package:flutter/material.dart';
@@ -90,9 +91,29 @@ class DailyTransactionsScreen extends StatelessWidget {
                 return Slidable(
                   // The end action pane is the one at the right or the bottom side.
                   endActionPane: ActionPane(
-                    extentRatio: .4,
+                    extentRatio: .5,
                     motion: StretchMotion(),
                     children: [
+                      Theme(
+                        data: Theme.of(context).copyWith(
+                            outlinedButtonTheme: OutlinedButtonThemeData(
+                                style: ButtonStyle(
+                                    iconColor: WidgetStatePropertyAll(context
+                                        .colorScheme.onErrorContainer)))),
+                        child: SlidableAction(
+                          onPressed: (_) => showModalBottomSheet(
+                              isScrollControlled: true,
+                              enableDrag: true,
+                              context: context,
+                              builder: (context) =>
+                                  AddEditTransactionModelScreen(
+                                    transactionToEdit: transactionList[index],
+                                  )),
+                          icon: yIcons.edit,
+                          backgroundColor: context.colorScheme.onPrimary,
+                          label: 'Edit',
+                        ),
+                      ),
                       Theme(
                         data: Theme.of(context).copyWith(
                             outlinedButtonTheme: OutlinedButtonThemeData(

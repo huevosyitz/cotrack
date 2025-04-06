@@ -9,7 +9,7 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:watch_it/watch_it.dart';
 
 import 'package:cotrack/core/services/services.dart';
-import 'package:cotrack/pages/transactions/transaction_modal_screen.dart';
+import 'package:cotrack/pages/transactions/add_edit_transaction_modal_screen.dart';
 import 'package:cotrack/themes/themes.dart';
 
 const List<String> months = [
@@ -96,8 +96,8 @@ class CalendarScreen extends StatelessWidget {
                 isScrollControlled: true,
                 enableDrag: true,
                 context: context,
-                builder: (context) => TransactionModelScreen(
-                      date: date,
+                builder: (context) => AddEditTransactionModelScreen(
+                      initialTransactionDate: date,
                     ));
           },
           onTap: () => showModalBottomSheet(

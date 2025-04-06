@@ -105,6 +105,50 @@ class TransactionService {
     );
   }
 
+  Mutation<Transaction, Transaction> updateTransactionMutation() {
+    // Create transaction mutation
+
+    return Mutation(
+      key: "createTransaction",
+      invalidateQueries: [queryKey],
+      queryFn: updateTransaction,
+      onStartMutation: (transaction) {
+        final queryObject = CachedQuery.instance.getQuery(queryKey);
+
+        if (queryObject != null) {
+          final query = queryObject as Query<List<Transaction>>;
+          final fallback = query.state.data;
+
+          // update old data
+          query.update((oldData) {
+            var idx = oldData?.indexWhere((t) => t.id == transaction.id);
+            if (idx != null) {
+              oldData?[idx] = transaction;
+            }
+            return oldData;
+          });
+
+          // return the previous data so that we can fallback to it if the
+          // mutation fails.
+          return fallback;
+        }
+
+        return [];
+      },
+      onError: (arg, error, fallback) {
+        CachedQuery.instance.updateQuery(
+            key: queryKey, updateFn: (_) => fallback as List<Transaction>);
+      },
+      onSuccess: (res, arg) {
+        CachedQuery.instance
+            .whereQuery((q) => q.key == _getDateQueryKey(res.transaction_date))
+            ?.forEach((q) {
+          q.invalidateQuery();
+        });
+      },
+    );
+  }
+
   Mutation<void, Transaction> deleteTransactionMutation() {
     return Mutation(
       key: "deleteTransaction",

@@ -11,18 +11,33 @@ import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
 import 'package:watch_it/watch_it.dart';
 
-class TransactionModelScreen extends WatchingWidget {
-  final DateTime? date;
-  final TransactionCategory? category;
+class AddEditTransactionModelScreen extends WatchingWidget {
+  DateTime? initialTransactionDate;
+  TransactionCategory? initialCategory;
+  final Transaction? transactionToEdit;
   final _formKey = GlobalKey<FormBuilderState>();
   final selectedCategoryType =
       ValueNotifier<TransactionType>(TransactionType.expense);
+  bool isEdit = false;
+  double? initialAmount;
+  int? initialAccountId;
+  String? initialNotes;
 
-  TransactionModelScreen({
+  AddEditTransactionModelScreen({
     super.key,
-    this.date,
-    this.category,
-  });
+    this.initialTransactionDate,
+    this.initialCategory,
+    this.transactionToEdit,
+  }) {
+    if (transactionToEdit != null) {
+      initialAmount = transactionToEdit!.amount;
+      initialTransactionDate = transactionToEdit!.transaction_date;
+      initialCategory = TransactionCategoryService.allCategories
+          .singleWhere((f) => f.id == transactionToEdit!.category_id);
+      initialAccountId = transactionToEdit!.account_id;
+      initialNotes = transactionToEdit!.notes;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +50,37 @@ class TransactionModelScreen extends WatchingWidget {
             : TransactionCategoryService.expenseCategories;
 
     final allAccounts = TransactionAccountService.allAccounts;
+
+    // // Wait for the first frame to finish building
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   if (initialCategory != null) {
+    //     _formKey.currentState?.patchValue({
+    //       'category_id': initialCategory?.id,
+    //     });
+    //   }
+
+    //   _formKey.currentState?.patchValue(
+    //     {
+    //       'date': initialTransactionDate ?? DateTime.now(),
+    //       'account': allAccounts.first.id
+    //     },
+    //   );
+
+    //   if (transactionToEdit != null) {
+    //     isEdit = true;
+    //     initialTransactionDate = transactionToEdit!.transaction_date;
+    //     initialCategory = TransactionCategoryService.allCategories
+    //         .singleWhere((f) => f.id == transactionToEdit!.category_id);
+
+    //     _formKey.currentState?.patchValue({
+    //       'date': initialTransactionDate,
+    //       'amount': transactionToEdit!.amount.toString(),
+    //       'category_id': initialCategory!.id,
+    //       'account': transactionToEdit!.account_id,
+    //       'notes': transactionToEdit!.notes,
+    //     });
+    //   }
+    // });
 
     return Scaffold(
       appBar: AppBar(
@@ -78,8 +124,8 @@ class TransactionModelScreen extends WatchingWidget {
                       format: DateFormat('yyyy-MMM-dd'),
                       enabled: true,
                       inputType: InputType.date,
-                      initialDate: date ?? DateTime.now(),
-                      initialValue: date ?? DateTime.now(),
+                      // initialDate: date ?? DateTime.now(),
+                      initialValue: initialTransactionDate ?? DateTime.now(),
                       decoration: InputDecoration(
                           labelText: 'Date',
                           floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -98,6 +144,8 @@ class TransactionModelScreen extends WatchingWidget {
                     FormBuilderTextField(
                       name: 'amount',
                       keyboardType: TextInputType.number,
+                      initialValue:
+                          NumberFormat("##0.##").format(initialAmount),
                       autofocus: true,
                       decoration: const InputDecoration(
                           labelText: 'Amount',
@@ -110,7 +158,7 @@ class TransactionModelScreen extends WatchingWidget {
                     FormBuilderChoiceChip<dynamic>(
                       name: 'category_id',
                       decoration: const InputDecoration(labelText: 'Category'),
-                      initialValue: category?.id,
+                      initialValue: initialCategory?.id,
                       spacing: 3,
                       showCheckmark: false,
                       visualDensity: VisualDensity.compact,
@@ -130,7 +178,7 @@ class TransactionModelScreen extends WatchingWidget {
                     FormBuilderChoiceChip<dynamic>(
                       name: 'account',
                       decoration: const InputDecoration(labelText: 'Account'),
-                      initialValue: allAccounts.first.id,
+                      initialValue: initialAccountId ?? allAccounts.first.id,
                       spacing: 3,
                       options: allAccounts
                           .map((account) => FormBuilderChipOption(
@@ -144,6 +192,7 @@ class TransactionModelScreen extends WatchingWidget {
                     ),
                     FormBuilderTextField(
                       name: 'notes',
+                      initialValue: initialNotes,
                       decoration: const InputDecoration(
                           labelText: 'Notes',
                           floatingLabelBehavior: FloatingLabelBehavior.always),
