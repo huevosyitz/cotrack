@@ -164,6 +164,13 @@ class TransactionService {
         query.update((oldData) =>
             oldData?.where((t) => t.id != transaction.id).toList());
 
+        CachedQuery.instance
+            .whereQuery(
+                (q) => q.key == _getDateQueryKey(transaction.transaction_date))
+            ?.forEach((q) {
+          q.invalidateQuery();
+        });
+
         // return the previous data so that we can fallback to it if the
         // mutation fails.
         return fallback;
@@ -173,13 +180,7 @@ class TransactionService {
         CachedQuery.instance.updateQuery(
             key: queryKey, updateFn: (_) => fallback as List<Transaction>);
       },
-      onSuccess: (res, arg) {
-        CachedQuery.instance
-            .whereQuery((q) => q.key == _getDateQueryKey(arg.transaction_date))
-            ?.forEach((q) {
-          q.invalidateQuery();
-        });
-      },
+      onSuccess: (res, arg) {},
     );
   }
 

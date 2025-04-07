@@ -40,10 +40,10 @@ class CalendarScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final transactionService = di.get<TransactionService>();
-    final q = transactionService.getAllMyTransactionsQuery();
+    final transactionQuery = transactionService.getAllMyTransactionsQuery();
     final categoryService = di.get<TransactionCategoryService>();
 
-    q.stream.listen((state) {
+    transactionQuery.stream.listen((state) {
       if (state.status == QueryStatus.loading) {
         // show loading spinner
         if (context.mounted) context.loaderOverlay.show();
@@ -91,26 +91,9 @@ class CalendarScreen extends StatelessWidget {
             .fold(0.0, (value, element) => value + element);
 
         return GestureDetector(
-          onDoubleTap: () {
-            showModalBottomSheet(
-                isScrollControlled: true,
-                enableDrag: true,
-                context: context,
-                builder: (context) => AddEditTransactionModelScreen(
-                      initialTransactionDate: date,
-                    ));
-          },
-          onTap: () => showModalBottomSheet(
-              isScrollControlled: true,
-              enableDrag: true,
-              context: context,
-              builder: (context) => FractionallySizedBox(
-                    heightFactor: 0.7,
-                    child: DailyTransactionsScreen(
-                      date: date,
-                      transactionService: transactionService,
-                    ),
-                  )),
+          onDoubleTap: () => openAddTransactionModal(context, date),
+          onTap: () =>
+              openDailyTransactionModal(context, date, transactionQuery),
           child: Container(
             width: double.infinity,
             height: double.infinity,
@@ -171,25 +154,6 @@ class CalendarScreen extends StatelessWidget {
             ),
           ),
         );
-
-        // // Return your widget to display as month cell.
-        // return Container(
-        //   decoration: BoxDecoration(
-        //     border: Border.all(
-        //       color: yColors.background3,
-        //       width: 0.5,
-        //     ),
-        //     // color: isToday ? context.primaryColorDark : context.backgroundColor,
-        //   ),
-        //   child: Text(date.day.toString(),
-        //       style: TextStyle(
-        //           color: isInMonth
-        //               ? Theme.of(context).colorScheme.onSurface
-        //               : Theme.of(context)
-        //                   .colorScheme
-        //                   .onSurface
-        //                   .withValues(alpha: .3))),
-        // );
       },
       headerStringBuilder: (date, {secondaryDate}) =>
           "${months[date.month - 1]} ${date.year}",
@@ -231,9 +195,6 @@ class CalendarScreen extends StatelessWidget {
           padding: const EdgeInsets.all(6.0),
           child: Text(weekdays[day]),
         ),
-        // child: Text(WeekDays.values[day]
-        //     .toString()
-        //     .substring(WeekDays.values[day].toString().indexOf('.') + 1)),
       ),
       borderSize: 1,
       borderColor: yColors.background,
@@ -243,28 +204,6 @@ class CalendarScreen extends StatelessWidget {
       initialMonth: DateTime.now(),
       cellAspectRatio: 1,
       onPageChange: (date, pageIndex) => print("$date, $pageIndex"),
-      // onCellTap: (events, date) async {
-      //   // Implement callback when user taps on a cell.
-      //   print(date);
-
-      // showModalBottomSheet(
-      //     isScrollControlled: true,
-      //     enableDrag: true,
-      //     context: context,
-      //     builder: (context) => TransactionModelScreen(
-      //           date: date,
-      //         ));
-
-      // var result = await showCupertinoModalBottomSheet(
-      //     expand: true,
-      //     isDismissible: false,
-      //     useRootNavigator: true,
-      //     context: context,
-      //     backgroundColor: Colors.transparent,
-      //     builder: (context) => TransactionModelScreen(
-      //           date: date,
-      //         ));
-      // },
       startDay: WeekDays.sunday, // To change the first day of the week.
       // This callback will only work if cellBuilder is null.
       onEventTap: (event, date) => print("tap $event"),
@@ -274,5 +213,34 @@ class CalendarScreen extends StatelessWidget {
       // headerBuilder: MonthHeader.hidden, // To hide month header
       showWeekTileBorder: false, // To show or hide header border
     );
+  }
+
+  Future<dynamic> openDailyTransactionModal(
+      BuildContext context, DateTime date, Query<List<Transaction>> q) {
+    return showModalBottomSheet(
+        isScrollControlled: true,
+        enableDrag: true,
+        context: context,
+        builder: (context) => FractionallySizedBox(
+              heightFactor: 0.7,
+              child: DailyTransactionsScreen(
+                date: date,
+                onDismiss: (value) async {
+                  if (value.refresh) {
+                    await q.refetch();
+                  }
+                },
+              ),
+            ));
+  }
+
+  Future<dynamic> openAddTransactionModal(BuildContext context, DateTime date) {
+    return showModalBottomSheet(
+        isScrollControlled: true,
+        enableDrag: true,
+        context: context,
+        builder: (context) => AddEditTransactionModelScreen(
+              initialTransactionDate: date,
+            ));
   }
 }

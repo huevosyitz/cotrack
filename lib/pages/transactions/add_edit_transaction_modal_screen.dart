@@ -144,8 +144,9 @@ class AddEditTransactionModelScreen extends WatchingWidget {
                     FormBuilderTextField(
                       name: 'amount',
                       keyboardType: TextInputType.number,
-                      initialValue:
-                          NumberFormat("##0.##").format(initialAmount),
+                      initialValue: initialAmount == null
+                          ? null
+                          : NumberFormat("##0.##").format(initialAmount),
                       autofocus: true,
                       decoration: const InputDecoration(
                           labelText: 'Amount',
@@ -260,7 +261,12 @@ class AddEditTransactionModelScreen extends WatchingWidget {
 
                                       Loggy.info("Created transaction: $tran");
 
-                                      if (context.mounted) context.pop();
+                                      if (context.mounted) {
+                                        context.pop({
+                                          'refresh': true,
+                                          'transaction': tran
+                                        });
+                                      }
                                     }
                                   },
                             child: snapshot.isLoading
