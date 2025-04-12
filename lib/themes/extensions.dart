@@ -105,3 +105,9 @@ extension LoaderUtil on Future {
     }
   }
 }
+
+extension DateUtils on DateTime {
+  bool isSameDayAs(DateTime other) {
+    return year == other.year && month == other.month && day == other.day;
+  }
+}

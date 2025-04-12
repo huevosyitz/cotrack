@@ -30,6 +30,7 @@ class AddEditTransactionModelScreen extends WatchingWidget {
     this.transactionToEdit,
   }) {
     if (transactionToEdit != null) {
+      isEdit = true;
       initialAmount = transactionToEdit!.amount;
       initialTransactionDate = transactionToEdit!.transaction_date;
       initialCategory = TransactionCategoryService.allCategories
@@ -50,37 +51,6 @@ class AddEditTransactionModelScreen extends WatchingWidget {
             : TransactionCategoryService.expenseCategories;
 
     final allAccounts = TransactionAccountService.allAccounts;
-
-    // // Wait for the first frame to finish building
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   if (initialCategory != null) {
-    //     _formKey.currentState?.patchValue({
-    //       'category_id': initialCategory?.id,
-    //     });
-    //   }
-
-    //   _formKey.currentState?.patchValue(
-    //     {
-    //       'date': initialTransactionDate ?? DateTime.now(),
-    //       'account': allAccounts.first.id
-    //     },
-    //   );
-
-    //   if (transactionToEdit != null) {
-    //     isEdit = true;
-    //     initialTransactionDate = transactionToEdit!.transaction_date;
-    //     initialCategory = TransactionCategoryService.allCategories
-    //         .singleWhere((f) => f.id == transactionToEdit!.category_id);
-
-    //     _formKey.currentState?.patchValue({
-    //       'date': initialTransactionDate,
-    //       'amount': transactionToEdit!.amount.toString(),
-    //       'category_id': initialCategory!.id,
-    //       'account': transactionToEdit!.account_id,
-    //       'notes': transactionToEdit!.notes,
-    //     });
-    //   }
-    // });
 
     return Scaffold(
       appBar: AppBar(
@@ -199,8 +169,9 @@ class AddEditTransactionModelScreen extends WatchingWidget {
                           floatingLabelBehavior: FloatingLabelBehavior.always),
                     ),
                     MutationBuilder(
-                        mutation:
-                            transactionService.createTransactionMutation(),
+                        mutation: isEdit
+                            ? transactionService.updateTransactionMutation()
+                            : transactionService.createTransactionMutation(),
                         builder: (context, snapshot, mutate) {
                           return MaterialButton(
                             minWidth: double.infinity,
@@ -241,23 +212,36 @@ class AddEditTransactionModelScreen extends WatchingWidget {
                                         throw Exception("User not found");
                                       }
 
-                                      final transaction = Transaction(
-                                        id: 0,
-                                        created_at: DateTime.now(),
-                                        transaction_date: form["date"],
-                                        amount: double.parse(form["amount"]),
-                                        category_id: form["category_id"],
-                                        notes: form["notes"],
-                                        created_by: user.id,
-                                        updated_by: user.id,
-                                        group_id: user.groupId,
-                                        account_id: form["account"],
-                                      );
+                                      Transaction transactionToSubmit;
 
-                                      // var tran = await transactionService
-                                      //     .createTransaction(transaction);
+                                      if (isEdit) {
+                                        transactionToSubmit =
+                                            transactionToEdit!.copyWith(
+                                          updated_at: DateTime.now(),
+                                          transaction_date: form["date"],
+                                          amount: double.parse(form["amount"]),
+                                          category_id: form["category_id"],
+                                          notes: form["notes"],
+                                          account_id: form["account"],
+                                          updated_by: user.id,
+                                        );
+                                      } else {
+                                        transactionToSubmit = Transaction(
+                                          id: 0,
+                                          created_at: DateTime.now(),
+                                          updated_at: null,
+                                          transaction_date: form["date"],
+                                          amount: double.parse(form["amount"]),
+                                          category_id: form["category_id"],
+                                          notes: form["notes"],
+                                          account_id: form["account"],
+                                          created_by: user.id,
+                                          updated_by: user.id,
+                                          group_id: user.groupId,
+                                        );
+                                      }
 
-                                      var tran = mutate(transaction);
+                                      var tran = mutate(transactionToSubmit);
 
                                       Loggy.info("Created transaction: $tran");
 

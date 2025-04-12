@@ -5,7 +5,6 @@ import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
 import 'package:cotrack/pages/transactions/add_edit_transaction_modal_screen.dart';
 import 'package:cotrack/themes/themes.dart';
-import 'package:cotrack/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';

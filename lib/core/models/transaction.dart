@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 class Transaction {
   final int id;
   final DateTime created_at;
+  final DateTime? updated_at;
   final DateTime transaction_date;
   final double amount;
   final int category_id;
@@ -17,6 +18,7 @@ class Transaction {
   Transaction({
     required this.id,
     required this.created_at,
+    this.updated_at,
     required this.transaction_date,
     required this.amount,
     required this.category_id,
@@ -30,6 +32,7 @@ class Transaction {
   Transaction copyWith({
     int? id,
     DateTime? created_at,
+    DateTime? updated_at,
     DateTime? transaction_date,
     double? amount,
     int? category_id,
@@ -42,6 +45,7 @@ class Transaction {
     return Transaction(
       id: id ?? this.id,
       created_at: created_at ?? this.created_at,
+      updated_at: updated_at ?? this.updated_at,
       transaction_date: transaction_date ?? this.transaction_date,
       amount: amount ?? this.amount,
       category_id: category_id ?? this.category_id,
@@ -57,6 +61,7 @@ class Transaction {
     return {
       'id': id,
       'created_at': created_at.toIso8601String(),
+      'updated_at': updated_at?.toIso8601String(),
       'transaction_date': transaction_date.toIso8601String(),
       'amount': amount,
       'category_id': category_id,
@@ -72,6 +77,7 @@ class Transaction {
     return Transaction(
       id: map['id']?.toInt() ?? 0,
       created_at: DateTime.parse(map['created_at']),
+      updated_at: map['updated_at'] == null ? null : DateTime.parse(map['updated_at']),
       transaction_date: DateTime.parse(map['transaction_date']),
       amount: map['amount']?.toDouble() ?? 0.0,
       category_id: map['category_id']?.toInt() ?? 0,
@@ -90,7 +96,7 @@ class Transaction {
 
   @override
   String toString() {
-    return 'Transaction(id: $id, created_at: $created_at, transaction_date: $transaction_date, amount: $amount, category_id: $category_id, notes: $notes, created_by: $created_by, updated_by: $updated_by, group_id: $group_id, account_id: $account_id)';
+    return 'Transaction(id: $id, created_at: $created_at, updated_at: $updated_at,  transaction_date: $transaction_date, amount: $amount, category_id: $category_id, notes: $notes, created_by: $created_by, updated_by: $updated_by, group_id: $group_id, account_id: $account_id)';
   }
 
   @override
@@ -100,6 +106,7 @@ class Transaction {
     return other is Transaction &&
         other.id == id &&
         other.created_at == created_at &&
+        other.updated_at == updated_at &&
         other.transaction_date == transaction_date &&
         other.amount == amount &&
         other.category_id == category_id &&
@@ -114,6 +121,7 @@ class Transaction {
   int get hashCode {
     return id.hashCode ^
         created_at.hashCode ^
+        updated_at.hashCode ^
         transaction_date.hashCode ^
         amount.hashCode ^
         category_id.hashCode ^

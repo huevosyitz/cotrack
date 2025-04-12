@@ -10,7 +10,7 @@ class CompactListTile extends StatelessWidget {
   final VoidCallback? onTap;
 
   const CompactListTile({
-    Key? key,
+    super.key,
     this.leading,
     this.title,
     this.subtitle,
@@ -18,7 +18,7 @@ class CompactListTile extends StatelessWidget {
     this.height = 48.0,
     this.padding = const EdgeInsets.symmetric(horizontal: 16),
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
