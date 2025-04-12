@@ -155,21 +155,24 @@ class TransactionService {
       invalidateQueries: [queryKey],
       queryFn: deleteTransaction,
       onStartMutation: (transaction) {
-        final query = CachedQuery.instance
-                .getQuery(_getDateQueryKey(transaction.transaction_date))
-            as Query<List<Transaction>>;
+        final  getquery = CachedQuery.instance
+                .getQuery(queryKey);
+
+        if (getquery == null) return null;
+
+        final query = getquery as Query<List<Transaction>>;
         final fallback = query.state.data;
 
         // optimistically set the data
         query.update((oldData) =>
             oldData?.where((t) => t.id != transaction.id).toList());
 
-        CachedQuery.instance
-            .whereQuery(
-                (q) => q.key == _getDateQueryKey(transaction.transaction_date))
-            ?.forEach((q) {
-          q.invalidateQuery();
-        });
+        // CachedQuery.instance
+        //     .whereQuery(
+        //         (q) => q.key == _getDateQueryKey(transaction.transaction_date))
+        //     ?.forEach((q) {
+        //   q.invalidateQuery();
+        // });
 
         // return the previous data so that we can fallback to it if the
         // mutation fails.
