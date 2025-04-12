@@ -94,6 +94,7 @@ class TransactionService {
       onError: (arg, error, fallback) {
         CachedQuery.instance.updateQuery(
             key: queryKey, updateFn: (_) => fallback as List<Transaction>);
+        throw Exception(error);
       },
       onSuccess: (res, arg) {
         CachedQuery.instance
@@ -106,8 +107,6 @@ class TransactionService {
   }
 
   Mutation<Transaction, Transaction> updateTransactionMutation() {
-    // Create transaction mutation
-
     return Mutation(
       key: "updateTransaction",
       invalidateQueries: [queryKey],
@@ -138,6 +137,7 @@ class TransactionService {
       onError: (arg, error, fallback) {
         CachedQuery.instance.updateQuery(
             key: queryKey, updateFn: (_) => fallback as List<Transaction>);
+        throw Exception(error);
       },
       onSuccess: (res, arg) {
         CachedQuery.instance
@@ -155,8 +155,7 @@ class TransactionService {
       invalidateQueries: [queryKey],
       queryFn: deleteTransaction,
       onStartMutation: (transaction) {
-        final  getquery = CachedQuery.instance
-                .getQuery(queryKey);
+        final getquery = CachedQuery.instance.getQuery(queryKey);
 
         if (getquery == null) return null;
 
@@ -182,6 +181,7 @@ class TransactionService {
         Loggy.error("Error deleting transaction: $error");
         CachedQuery.instance.updateQuery(
             key: queryKey, updateFn: (_) => fallback as List<Transaction>);
+        throw Exception(error);
       },
       onSuccess: (res, arg) {},
     );
