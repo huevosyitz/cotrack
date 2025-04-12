@@ -64,6 +64,7 @@ dependencies:
   pie_menu: ^3.2.7
   gaimon: ^1.4.0
   uuid: ^4.5.1
+  awesome_snackbar_content: ^0.1.5
 
 dev_dependencies:
   flutter_test:

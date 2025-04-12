@@ -1,8 +1,24 @@
+import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:cotrack/themes/themes.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+
+enum MessageType {
+  success,
+  warning,
+  error,
+  info,
+}
+
+Map<MessageType, ContentType> get messageTypeToContentType => {
+      MessageType.success: ContentType.success,
+      MessageType.warning: ContentType.warning,
+      MessageType.error: ContentType.failure,
+      MessageType.info: ContentType.help,
+    };
 
 extension BuildContextEntension<T> on BuildContext {
   Future<T?> pushTo<T extends Object?>(
@@ -33,16 +49,6 @@ extension BuildContextEntension<T> on BuildContext {
     );
   }
 
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(
-      String message) {
-    return ScaffoldMessenger.of(this).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
   Future<bool?> showToast(String message) {
 // It's a plugin to show toast and we can with extension
     return Fluttertoast.showToast(
@@ -53,6 +59,28 @@ extension BuildContextEntension<T> on BuildContext {
       backgroundColor: yColors.primary,
       textColor: yColors.primaryText,
     );
+  }
+
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? showMessage(
+      String message,
+      {MessageType type = MessageType.error,
+      Duration duration = const Duration(seconds: 3)}) {
+    if (mounted) {
+      final snackBar = SnackBar(
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.transparent,
+        duration: duration,
+        content: AwesomeSnackbarContent(
+          title: type.name.capitalizeFirst,
+          message: message,
+          contentType: messageTypeToContentType[type]!,
+        ),
+      );
+      return ScaffoldMessenger.of(this).showSnackBar(snackBar);
+    }
+
+    return null;
   }
 
   ColorScheme get colorScheme => Theme.of(this).colorScheme;
