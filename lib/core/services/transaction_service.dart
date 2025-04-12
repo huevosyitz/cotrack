@@ -109,7 +109,7 @@ class TransactionService {
     // Create transaction mutation
 
     return Mutation(
-      key: "createTransaction",
+      key: "updateTransaction",
       invalidateQueries: [queryKey],
       queryFn: updateTransaction,
       onStartMutation: (transaction) {

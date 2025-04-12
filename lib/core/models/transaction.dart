@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/widgets.dart';
 
 class Transaction {
-  final int id;
+  final String id;
   final DateTime created_at;
   final DateTime? updated_at;
   final DateTime transaction_date;
@@ -30,7 +30,7 @@ class Transaction {
   });
 
   Transaction copyWith({
-    int? id,
+    String? id,
     DateTime? created_at,
     DateTime? updated_at,
     DateTime? transaction_date,
@@ -75,9 +75,10 @@ class Transaction {
 
   factory Transaction.fromMap(Map<String, dynamic> map) {
     return Transaction(
-      id: map['id']?.toInt() ?? 0,
+      id: map['id'] ?? '',
       created_at: DateTime.parse(map['created_at']),
-      updated_at: map['updated_at'] == null ? null : DateTime.parse(map['updated_at']),
+      updated_at:
+          map['updated_at'] == null ? null : DateTime.parse(map['updated_at']),
       transaction_date: DateTime.parse(map['transaction_date']),
       amount: map['amount']?.toDouble() ?? 0.0,
       category_id: map['category_id']?.toInt() ?? 0,

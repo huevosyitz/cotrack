@@ -32,7 +32,11 @@ class DailyTransactionsView extends StatelessWidget {
       {super.key,
       required this.date,
       required this.transactionList,
-      this.onDismiss});
+      this.onDismiss}) {
+    transactionList.sort(
+      (a, b) => a.transaction_date.compareTo(b.transaction_date),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

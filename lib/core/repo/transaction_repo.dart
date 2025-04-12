@@ -1,4 +1,5 @@
 import 'package:cotrack/core/models/models.dart';
+import 'package:cotrack/utils/extensions.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -9,7 +10,12 @@ class TransactionRepo {
   Future<Transaction> createTransaction(Transaction transaction) async {
     // Create transaction
 
-    var tran = transaction.toMap()..remove("id");
+    if (!isValidUuid(transaction.id)) {
+      throw Exception(
+          "Invalid UUID format for transaction ID: ${transaction.id}");
+    }
+
+    var tran = transaction.toMap();
 
     var result =
         await _supaClient.from("transactions").insert(tran).select().single();
@@ -20,16 +26,18 @@ class TransactionRepo {
   Future<Transaction> updateTransaction(Transaction transaction) async {
     // Update transaction
 
+    if (!isValidUuid(transaction.id)) {
+      throw Exception(
+          "Invalid UUID format for transaction ID: ${transaction.id}");
+    }
+
     var result = await _supaClient
         .from(_tableName)
         .update({
-          "transaction_date": transaction.transaction_date,
-          "amount": transaction.amount,
-          "category_id": transaction.category_id,
-          "notes": transaction.notes,
-          "updated_by": transaction.updated_by,
+          ...transaction.toMap()..remove("id"),
         })
         .eq("id", transaction.id)
+        .select()
         .single();
 
     return Transaction.fromMap(result);

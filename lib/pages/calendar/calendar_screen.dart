@@ -90,8 +90,8 @@ class CalendarScreen extends StatelessWidget {
     final filteredTransactions = transactions
         .where((t) => t.transaction_date.isSameDayAs(today))
         .toList();
-    selectedTrans = filteredTransactions;
-    selectedDate = today;
+
+    selectedDateTransactions.value = (today, filteredTransactions);
   }
 
   CalendarEventData<Transaction> _toCalendarEvent(Transaction t) {

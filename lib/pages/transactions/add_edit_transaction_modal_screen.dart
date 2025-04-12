@@ -192,20 +192,6 @@ class AddEditTransactionModelScreen extends WatchingWidget {
 
                                     if (_formKey.currentState?.isValid ==
                                         true) {
-                                      // Save the form data
-                                      // final transaction = Transaction(
-                                      //   id: '1',
-                                      //   title: _formKey.currentState?.value['title'],
-                                      //   amount: _formKey.currentState?.value['amount'],
-                                      //   date: _formKey.currentState?.value['date'],
-                                      //   categoryId: _formKey.currentState?.value['category'],
-                                      //   note: _formKey.currentState?.value['note'],
-                                      // );
-                                      // TransactionService.addTransaction(transaction);
-                                      // Navigator.of(context).pop();
-
-                                      // Save the form data
-
                                       var form = _formKey.currentState!.value;
 
                                       if (user == null) {
@@ -227,7 +213,7 @@ class AddEditTransactionModelScreen extends WatchingWidget {
                                         );
                                       } else {
                                         transactionToSubmit = Transaction(
-                                          id: 0,
+                                          id: generateUuid(),
                                           created_at: DateTime.now(),
                                           updated_at: null,
                                           transaction_date: form["date"],
