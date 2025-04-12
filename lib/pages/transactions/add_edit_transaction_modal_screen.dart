@@ -1,4 +1,3 @@
-import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:cotrack/core/state/app_state.dart';
 import 'package:cotrack/themes/extensions.dart';
@@ -65,52 +64,51 @@ class AddEditTransactionModelScreen extends WatchingWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(children: [
-            SegmentedButton<TransactionType>(
-              segments: const <ButtonSegment<TransactionType>>[
-                ButtonSegment<TransactionType>(
-                  value: TransactionType.income,
-                  label: Text('Income'),
-                  // icon: Icon(Icons.calendar_view_day)
-                ),
-                ButtonSegment<TransactionType>(
-                  value: TransactionType.expense,
-                  label: Text('Expense'),
-                  // icon: Icon(Icons.calendar_view_week)
-                ),
-              ],
-              selected: <TransactionType>{selectedType},
-              onSelectionChanged: (Set<TransactionType> transactionSelected) {
-                selectedCategoryType.value = transactionSelected.first;
-              },
-            ),
-          ]),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
-          child: Column(
-            spacing: 12,
-            children: [
-              FormBuilder(
-                key: _formKey,
-                child: Column(
-                  spacing: 12,
-                  children: [
-                    _buildDateTimePicker(),
-                    _buildAmountTextField(),
-                    _buildCategoryChoices(displayCategories),
-                    _buildAccountChoices(allAccounts),
-                    _buildNotesField(),
-                    _buildSaveButton(transactionService, user)
-                  ],
-                ),
+        title: Row(children: [
+          SegmentedButton<TransactionType>(
+            segments: const <ButtonSegment<TransactionType>>[
+              ButtonSegment<TransactionType>(
+                value: TransactionType.income,
+                label: Text('Income'),
+                // icon: Icon(Icons.calendar_view_day)
+              ),
+              ButtonSegment<TransactionType>(
+                value: TransactionType.expense,
+                label: Text('Expense'),
+                // icon: Icon(Icons.calendar_view_week)
               ),
             ],
+            selected: <TransactionType>{selectedType},
+            onSelectionChanged: (Set<TransactionType> transactionSelected) {
+              selectedCategoryType.value = transactionSelected.first;
+            },
           ),
+        ]),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 8),
+        child: Column(
+          spacing: 8,
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: FormBuilder(
+                  key: _formKey,
+                  child: Column(
+                    spacing: 12,
+                    children: [
+                      _buildDateTimePicker(),
+                      _buildAmountTextField(),
+                      _buildCategoryChoices(displayCategories),
+                      _buildAccountChoices(allAccounts),
+                      _buildNotesField(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            _buildSaveButton(transactionService, user)
+          ],
         ),
       ),
     );
@@ -152,7 +150,10 @@ class AddEditTransactionModelScreen extends WatchingWidget {
         var tran = await mutate(transactionToSubmit);
 
         Loggy.info("Created transaction: $tran");
-        throw Exception("Transaction not created");
+
+        if (context.mounted) {
+          context.pop({'refresh': true, 'transaction': tran});
+        }
       }
     } catch (e) {
       Loggy.error("Error saving transaction: $e");
