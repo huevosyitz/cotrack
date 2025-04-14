@@ -41,6 +41,7 @@ class AddEditTransactionModelScreen extends WatchingWidget {
       initialTransactionDate = transactionToEdit!.transaction_date;
       initialCategory = TransactionCategoryService.allCategories
           .singleWhere((f) => f.id == transactionToEdit!.category_id);
+      selectedCategoryType.value = initialCategory!.transactionType;
       initialAccountId = transactionToEdit!.account_id;
       initialNotes = transactionToEdit!.notes;
     }

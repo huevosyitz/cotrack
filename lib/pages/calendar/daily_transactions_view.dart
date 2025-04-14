@@ -193,6 +193,13 @@ class DailyTransactionsView extends StatelessWidget {
                               ? yColors.primary
                               : yColors.warn),
                     ),
+                    onTap: () => showModalBottomSheet(
+                        isScrollControlled: true,
+                        enableDrag: true,
+                        context: context,
+                        builder: (context) => AddEditTransactionModelScreen(
+                              transactionToEdit: transactionList[index],
+                            )),
                   ),
                 );
               },
