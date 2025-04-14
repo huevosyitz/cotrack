@@ -13,6 +13,6 @@ class yColors {
   static const background2 = Color(0xff1f2129);
   static const background3 = Color(0xff35383f);
   static const background4 = Color(0xFF494B50);
-  static const warn = Color(0xffec615f);
+  static const warn = Color.fromARGB(255, 173, 69, 68);
   static const amber = Colors.amber;
 }

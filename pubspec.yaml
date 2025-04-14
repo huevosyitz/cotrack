@@ -65,6 +65,7 @@ dependencies:
   gaimon: ^1.4.0
   uuid: ^4.5.1
   awesome_snackbar_content: ^0.1.5
+  syncfusion_flutter_charts: ^29.1.37+1
 
 dev_dependencies:
   flutter_test:
