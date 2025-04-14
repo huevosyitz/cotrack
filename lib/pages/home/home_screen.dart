@@ -3,7 +3,7 @@ import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:cotrack/components/category_action_menu.dart';
 import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
-import 'package:cotrack/pages/transactions/transaction_modal_screen.dart';
+import 'package:cotrack/pages/transactions/add_edit_transaction_modal_screen.dart';
 import 'package:cotrack/themes/themes.dart';
 import 'package:cotrack/utils/extensions.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +32,7 @@ class HomeScreen extends HookWidget {
                       .get<TransactionCategoryService>()
                       .getExpenseCategoriesQuery(),
                   builder: (context, state) {
-                    if (state.isLoading) {
+                    if (state.isLoading || state.data == null) {
                       return const Center(
                           child: SizedBox(
                               width: 20,
@@ -62,7 +62,7 @@ class HomeScreen extends HookWidget {
                 isScrollControlled: true,
                 enableDrag: true,
                 context: context,
-                builder: (context) => TransactionModelScreen());
+                builder: (context) => AddEditTransactionModelScreen());
           },
           child: const Icon(yIcons.add),
         ),
@@ -119,10 +119,12 @@ class _CategoryGridWrapperState extends State<CategoryGridWrapper> {
 
     // return wrap;
 
-    var wrap = Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      alignment: WrapAlignment.start,
-      runSpacing: 20,
+    var wrap = GridView.count(
+      crossAxisCount: 5,
+      scrollDirection: Axis.vertical,
+      childAspectRatio: .8,
+      mainAxisSpacing: 8,
+      padding: EdgeInsets.all(8),
       children: categoryWidgets,
     );
 

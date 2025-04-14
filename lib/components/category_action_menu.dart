@@ -2,7 +2,7 @@ import 'package:cotrack/components/components.dart';
 import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
 import 'package:cotrack/pages/category/add_edit_category_screen.dart';
-import 'package:cotrack/pages/transactions/transaction_modal_screen.dart';
+import 'package:cotrack/pages/transactions/add_edit_transaction_modal_screen.dart';
 import 'package:cotrack/themes/themes.dart';
 import 'package:cotrack/utils/deviceUtils.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +51,8 @@ class CategoryActionMenu extends StatelessWidget {
             isScrollControlled: true,
             enableDrag: true,
             context: context,
-            builder: (context) => AddEditCategoryScreen(categoryToEdit: category),
+            builder: (context) =>
+                AddEditCategoryScreen(categoryToEdit: category),
           ),
 
           /// Optical correction
@@ -83,8 +84,8 @@ class CategoryActionMenu extends StatelessWidget {
               isScrollControlled: true,
               enableDrag: true,
               context: context,
-              builder: (context) => TransactionModelScreen(
-                    category: category,
+              builder: (context) => AddEditTransactionModelScreen(
+                    initialCategory: category,
                   ));
         },
       ),

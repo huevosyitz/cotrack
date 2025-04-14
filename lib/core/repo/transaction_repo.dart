@@ -1,15 +1,24 @@
 import 'package:cotrack/core/models/models.dart';
-import 'package:cotrack/core/repo/transaction_category_repo.dart';
+import 'package:cotrack/utils/extensions.dart';
+import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+final _supaClient = Supabase.instance.client;
 
 class TransactionRepo {
   final String _tableName = "transactions";
   Future<Transaction> createTransaction(Transaction transaction) async {
     // Create transaction
 
-    var tran = transaction.toMap()..remove("id");
+    if (!isValidUuid(transaction.id)) {
+      throw Exception(
+          "Invalid UUID format for transaction ID: ${transaction.id}");
+    }
+
+    var tran = transaction.toMap();
 
     var result =
-        await supaClient.from("transactions").insert(tran).select().single();
+        await _supaClient.from("transactions").insert(tran).select().single();
 
     return Transaction.fromMap(result);
   }
@@ -17,16 +26,18 @@ class TransactionRepo {
   Future<Transaction> updateTransaction(Transaction transaction) async {
     // Update transaction
 
-    var result = await supaClient
+    if (!isValidUuid(transaction.id)) {
+      throw Exception(
+          "Invalid UUID format for transaction ID: ${transaction.id}");
+    }
+
+    var result = await _supaClient
         .from(_tableName)
         .update({
-          "transaction_date": transaction.transaction_date,
-          "amount": transaction.amount,
-          "category_id": transaction.category_id,
-          "notes": transaction.notes,
-          "updated_by": transaction.updated_by,
+          ...transaction.toMap()..remove("id"),
         })
         .eq("id", transaction.id)
+        .select()
         .single();
 
     return Transaction.fromMap(result);
@@ -35,7 +46,7 @@ class TransactionRepo {
   Future<void> deleteTransaction(Transaction transaction) async {
     // Delete transaction
 
-    await supaClient
+    await _supaClient
         .from(_tableName)
         .delete()
         .eq("id", transaction.id)
@@ -46,7 +57,27 @@ class TransactionRepo {
     // Get transactions
 
     var result =
-        await supaClient.from(_tableName).select().eq("group_id", groupId);
+        await _supaClient.from(_tableName).select().eq("group_id", groupId);
+
+    return result.map((e) => Transaction.fromMap(e)).toList();
+  }
+
+  Future<List<Transaction>> getTransactionsForGroupForDay(
+      int groupId, DateTime date) async {
+    // Get transactions
+    // Format date to 'yyyy-MM-dd'
+    String formattedDate = DateFormat('yyyy-MM-dd').format(date);
+
+    // Define start and end timestamps for the given day
+    String startOfDay = "$formattedDate 00:00:00.000Z";
+    String endOfDay = "$formattedDate 23:59:59.999Z";
+
+    var result = await _supaClient
+        .from(_tableName)
+        .select()
+        .eq("group_id", groupId)
+        .gte('transaction_date', startOfDay)
+        .lt('transaction_date', endOfDay);
 
     return result.map((e) => Transaction.fromMap(e)).toList();
   }

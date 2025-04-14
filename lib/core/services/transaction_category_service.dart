@@ -6,23 +6,28 @@ class TransactionCategoryService {
   final TransactionCategoryRepository _transactionCategoryRepository;
   static List<TransactionCategory> expenseCategories = [];
   static List<TransactionCategory> incomeCategories = [];
+  static List<TransactionCategory> allCategories = [];
   static Map<int, TransactionCategory> transactionCategoriesMap = {};
   static final queryKey = "getTransactionCategories";
 
   TransactionCategoryService(this._transactionCategoryRepository);
 
-  Future<List<TransactionCategory>> setupTransactionCategories() async {
-    var allCategories =
+  Future<List<TransactionCategory>> getAllTransactionCategories() async {
+    allCategories =
         await _transactionCategoryRepository.getAllTransactionCategories();
     expenseCategories = allCategories
         .where((e) => e.transactionType == TransactionType.expense)
+        .toList();
+
+    incomeCategories = allCategories
+        .where((e) => e.transactionType == TransactionType.income)
         .toList();
 
     transactionCategoriesMap = {for (var v in allCategories) v.id: v};
     return allCategories;
   }
 
-  Future<TransactionCategory> getTransactionCategoryById(String id) async {
+  Future<TransactionCategory> getTransactionCategoryById(int id) async {
     return await _transactionCategoryRepository.getTransactionCategoryById(id);
   }
 
@@ -40,7 +45,7 @@ class TransactionCategoryService {
     // Get transactions for group
 
     return Query(
-        key: queryKey, queryFn: setupTransactionCategories, initialData: []);
+        key: queryKey, queryFn: getAllTransactionCategories, initialData: []);
   }
 
   Query<List<TransactionCategory>> getExpenseCategoriesQuery() {
@@ -49,8 +54,24 @@ class TransactionCategoryService {
     return Query(
         key: queryKey,
         queryFn: () async {
-          final data = await setupTransactionCategories();
-          return data.where((e) => e.transactionType == TransactionType.expense).toList();
+          final data = await getAllTransactionCategories();
+          return data
+              .where((e) => e.transactionType == TransactionType.expense)
+              .toList();
+        },
+        initialData: []);
+  }
+
+  Query<List<TransactionCategory>> getIncomeCategoriesQuery() {
+    // Get transactions for group
+
+    return Query(
+        key: queryKey,
+        queryFn: () async {
+          final data = await getAllTransactionCategories();
+          return data
+              .where((e) => e.transactionType == TransactionType.income)
+              .toList();
         },
         initialData: []);
   }
@@ -102,8 +123,14 @@ class TransactionCategoryService {
           final fallback = query.state.data;
 
           // optimistically set the data
-          query.update((oldData) =>
-              [...?oldData?.where((a) => a.id != transaction.id), transaction]);
+          query.update((oldData) {
+            final itemToUpdateIdx =
+                oldData?.indexWhere((a) => a.id == transaction.id);
+            if (itemToUpdateIdx != null) {
+              oldData?[itemToUpdateIdx] = transaction;
+            }
+            return null;
+          });
 
           // return the previous data so that we can fallback to it if the
           // mutation fails.

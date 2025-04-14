@@ -8,6 +8,8 @@ class Registrations {
     // Repos
     di.registerSingleton<UserRepo>(UserRepo());
     di.registerSingleton<TransactionRepo>(TransactionRepo());
+    di.registerSingleton<TransactionAccountRepository>(
+        TransactionAccountRepository());
     di.registerSingleton<TransactionCategoryRepository>(
         TransactionCategoryRepository());
 
@@ -17,6 +19,8 @@ class Registrations {
 
     di.registerSingleton<TransactionCategoryService>(
         TransactionCategoryService(di.get()));
+    di.registerSingleton<TransactionAccountService>(
+        TransactionAccountService(di.get()));
 
     di.registerSingleton<TransactionService>(
         TransactionService(di.get(), di.get()));

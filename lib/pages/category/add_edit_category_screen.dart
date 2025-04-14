@@ -36,7 +36,12 @@ class AddEditCategoryScreen extends StatelessWidget {
             : Text('Add New Category'),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: 8
+        ),
         child: Column(
           children: [
             Expanded(
@@ -116,16 +121,16 @@ class AddEditCategoryScreen extends StatelessWidget {
                 ),
               ),
             ),
-            SaveButton(categoryService)
+            saveButton(categoryService)
           ],
         ),
       ),
     );
   }
 
-  Padding SaveButton(TransactionCategoryService categoryService) {
+  Widget saveButton(TransactionCategoryService categoryService) {
     return Padding(
-      padding: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.only(top: 8),
       child: ValueListenableBuilder(
         valueListenable: _isFormValid,
         builder: (context, value, child) => MutationBuilder(
