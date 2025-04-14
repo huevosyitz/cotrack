@@ -8,6 +8,7 @@ class yIcons {
   static const home = FluentIcons.home_20_regular;
   static const notifications = FluentIcons.alert_12_regular;
   static const booking = FluentIcons.book_16_regular;
+  static const charts = FluentIcons.chart_multiple_24_regular;
   static const finance = FluentIcons.money_16_regular;
   static const bookmarkMultipleEmpty = FluentIcons.bookmark_multiple_16_regular;
   static const bookmarkMultipleFilled = FluentIcons.bookmark_multiple_16_filled;

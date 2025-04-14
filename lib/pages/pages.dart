@@ -6,4 +6,4 @@ export 'home/home_screen.dart';
 export 'notifications.dart';
 export 'settings/settings_screen.dart';
 export 'transactions/add_edit_transaction_modal_screen.dart';
-export 'transactions/transactions_screen.dart';
+export 'transactions/stats_screen.dart';

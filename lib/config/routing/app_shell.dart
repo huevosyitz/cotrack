@@ -23,7 +23,6 @@ class AppShell extends WatchingWidget {
               // selectedItemColor: yColors.primary,
               // unselectedItemColor: yColors.background3,
               showUnselectedLabels: true,
-              
               items: [
                 BottomNavigationBarItem(
                   icon: Icon(
@@ -36,8 +35,8 @@ class AppShell extends WatchingWidget {
                   label: 'Calendar',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(yIcons.booking),
-                  label: 'Transactions',
+                  icon: Icon(yIcons.charts),
+                  label: 'Stats',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(yIcons.finance),
