@@ -5,6 +5,7 @@ import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
 import 'package:cotrack/pages/stats/add_edit_transaction_modal_screen.dart';
 import 'package:cotrack/themes/themes.dart';
+import 'package:cotrack/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
@@ -75,7 +76,7 @@ class DailyTransactionsView extends StatelessWidget {
                     valueListenable: _sumIncome,
                     builder: (_, value, __) {
                       return Text(
-                        "₱ ${value.toStringAsFixed(2)}",
+                        displayFormattedCurrency(value),
                         style:
                             context.bodySmall!.copyWith(color: yColors.primary),
                       );
@@ -84,7 +85,7 @@ class DailyTransactionsView extends StatelessWidget {
                     valueListenable: _sumExpense,
                     builder: (_, value, __) {
                       return Text(
-                        "₱ ${value.toStringAsFixed(2)}",
+                        displayFormattedCurrency(value),
                         style: context.bodySmall!.copyWith(color: yColors.warn),
                       );
                     })
@@ -186,7 +187,7 @@ class DailyTransactionsView extends StatelessWidget {
                           .copyWith(color: yColors.primaryTextFade1),
                     ),
                     trailing: Text(
-                      "₱ ${transactionList[index].amount}",
+                      displayFormattedCurrency(transactionList[index].amount),
                       style: context.labelSmall!.copyWith(
                           color: categoryService.isIncomeCategory(
                                   transactionList[index].category_id)

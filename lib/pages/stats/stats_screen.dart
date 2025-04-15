@@ -3,6 +3,8 @@ import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:cotrack/components/components.dart';
 import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
+import 'package:cotrack/pages/stats/category_stats.dart';
+import 'package:cotrack/pages/stats/category_stats_screen.dart';
 import 'package:cotrack/themes/yColors.dart';
 import 'package:cotrack/themes/yIcons.dart';
 import 'package:cotrack/utils/utils.dart';
@@ -16,10 +18,7 @@ class StatsScreen extends HookWidget {
   final transactionService = di.get<TransactionService>();
   final categoryService = di.get<TransactionCategoryService>();
 
-  final transactionTypes = [
-    TransactionType.income.name,
-    TransactionType.expense.name
-  ];
+  final transactionTypes = [TransactionType.income, TransactionType.expense];
 
   StatsScreen({super.key}); // 0 for Income, 1 for Expense
 
@@ -72,12 +71,13 @@ class StatsScreen extends HookWidget {
 
             // Filter transactions based on the selected tab
             final filteredTransactions = thisMonthTransactions == null
-                ? <ChartData>[]
+                ? <CategoryStats>[]
                 : _generateChartDataWithColors(
-                    thisMonthTransactions.values.toList());
+                    thisMonthTransactions.values.toList(),
+                    selectedTransactionType);
 
             final sum = filteredTransactions.fold<double>(
-                0, (sum, item) => sum + item.y);
+                0, (sum, item) => sum + item.totalAmount);
 
             return Column(
               children: [
@@ -153,15 +153,17 @@ class StatsScreen extends HookWidget {
                     //     fontSize: 12,
                     //   ),
                     // ),
-                    series: <PieSeries<ChartData, String>>[
-                      PieSeries<ChartData, String>(
+                    series: <PieSeries<CategoryStats, String>>[
+                      PieSeries<CategoryStats, String>(
                         radius: '70%',
                         strokeColor: Colors.black.withOpacity(0.1),
                         strokeWidth: 1,
                         dataSource: filteredTransactions,
-                        xValueMapper: (ChartData data, _) => data.x,
-                        yValueMapper: (ChartData data, _) => data.y,
-                        pointColorMapper: (ChartData data, _) => data.color,
+                        xValueMapper: (CategoryStats data, _) =>
+                            data.categoryName,
+                        yValueMapper: (CategoryStats data, _) =>
+                            data.totalAmount,
+                        pointColorMapper: (CategoryStats data, _) => data.color,
                         dataLabelSettings: const DataLabelSettings(
                             labelIntersectAction: LabelIntersectAction.shift,
                             isVisible: true,
@@ -173,13 +175,13 @@ class StatsScreen extends HookWidget {
                             connectorLineSettings: ConnectorLineSettings(
                                 // Type of the connector line
                                 type: ConnectorType.curve)),
-                        dataLabelMapper: (ChartData data, _) {
+                        dataLabelMapper: (CategoryStats data, _) {
                           // Calculate the percentage
                           final total = filteredTransactions.fold<double>(
-                              0, (sum, item) => sum + item.y);
-                          final percentage =
-                              ((data.y / total) * 100).toStringAsFixed(1);
-                          return '${data.x}\r\n$percentage%';
+                              0, (sum, item) => sum + item.totalAmount);
+                          final percentage = ((data.totalAmount / total) * 100)
+                              .toStringAsFixed(1);
+                          return '${data.categoryName}\r\n$percentage%';
                         },
                         animationDuration: 500,
                       ),
@@ -190,21 +192,32 @@ class StatsScreen extends HookWidget {
                   child: ListView.builder(
                     itemCount: filteredTransactions.length,
                     itemBuilder: (_, index) {
-                      final data = filteredTransactions[index];
+                      final categoryStat = filteredTransactions[index];
                       return CompactListTile(
+                        onTap: () => showModalBottomSheet(
+                          isScrollControlled: true,
+                          context: context,
+                          builder: (context) => CategoryStatsScreen(
+                            transactions: transactionList
+                                .where((e) =>
+                                    e.category_id == categoryStat.categoryId)
+                                .toList(),
+                          ),
+                        ),
                         leading: CircleAvatar(
-                          backgroundColor: data.color,
+                          backgroundColor: categoryStat.color,
                           child: Icon(
                             TransactionCategoryService
-                                .transactionCategoriesMap[data.id]
+                                .transactionCategoriesMap[
+                                    categoryStat.categoryId]
                                 ?.iconItem
                                 .icon,
                             color: yColors.background,
                           ),
                         ),
-                        title: Text(data.x),
+                        title: Text(categoryStat.categoryName),
                         trailing: Text(
-                          displayFormattedCurrency(data.y),
+                          displayFormattedCurrency(categoryStat.totalAmount),
                           style: context.labelMedium,
                         ),
                       );
@@ -220,20 +233,18 @@ class StatsScreen extends HookWidget {
   }
 }
 
-Map<String, Map<String, Map<String, ChartData>>>
+Map<String, Map<TransactionType, Map<String, CategoryStats>>>
     _groupTransactionsByMonthAndCategory(List<Transaction> transactions) {
-  Map<String, Map<String, Map<String, ChartData>>> groupedData = {};
+  Map<String, Map<TransactionType, Map<String, CategoryStats>>> groupedData =
+      {};
 
   for (var transaction in transactions) {
     // Format the transaction date to get the month (e.g., "January 2023")
     String month = DateFormat('yyyy-MM').format(transaction.transaction_date);
 
     // Get the category name
-    String transactionType = TransactionCategoryService
-            .transactionCategoriesMap[transaction.category_id]
-            ?.transactionType
-            .name ??
-        'Unknown';
+    TransactionType transactionType = TransactionCategoryService
+        .transactionCategoriesMap[transaction.category_id]!.transactionType;
 
     String categoryName = TransactionCategoryService
             .transactionCategoriesMap[transaction.category_id]?.name ??
@@ -249,7 +260,7 @@ Map<String, Map<String, Map<String, ChartData>>>
       groupedData[month]![transactionType] = {};
     }
 
-    final data = ChartData(
+    final data = CategoryStats(
       transaction.category_id,
       TransactionCategoryService
               .transactionCategoriesMap[transaction.category_id]?.name ??
@@ -260,7 +271,7 @@ Map<String, Map<String, Map<String, ChartData>>>
     if (!groupedData[month]![transactionType]!.containsKey(categoryName)) {
       groupedData[month]![transactionType]![categoryName] = data;
     } else {
-      groupedData[month]![transactionType]![categoryName]!.y +=
+      groupedData[month]![transactionType]![categoryName]!.totalAmount +=
           transaction.amount;
     }
   }
@@ -268,16 +279,20 @@ Map<String, Map<String, Map<String, ChartData>>>
   return groupedData;
 }
 
-List<ChartData> _generateChartDataWithColors(List<ChartData> transactions) {
+List<CategoryStats> _generateChartDataWithColors(
+    List<CategoryStats> transactions, TransactionType transactionType) {
   // Sort transactions by amount (descending)
-  transactions.sort((a, b) => b.y.compareTo(a.y));
+  transactions.sort((a, b) => b.totalAmount.compareTo(a.totalAmount));
 
   return transactions.map((data) {
     // use the colors list to get the color based on the index
     final index = transactions.indexOf(data) % colors.length;
-    final color = colors[index];
+    final color = transactionType == TransactionType.expense
+        ? colors[index]
+        : colors[5 + index];  // just so it starts with a cooler tone. lol
 
-    return ChartData(data.id, data.x, data.y, color);
+    return CategoryStats(
+        data.categoryId, data.categoryName, data.totalAmount, color);
   }).toList();
 }
 
@@ -315,12 +330,4 @@ Color? lerpMultiColor(double t) {
 
   // Lerp between the appropriate colors
   return Color.lerp(colors[segment], colors[segment + 1], segmentT);
-}
-
-class ChartData {
-  ChartData(this.id, this.x, this.y, [this.color]);
-  final int id;
-  final String x;
-  double y;
-  final Color? color;
 }

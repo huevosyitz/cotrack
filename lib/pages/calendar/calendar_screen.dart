@@ -4,7 +4,6 @@ import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/pages/calendar/daily_transactions_view.dart';
 import 'package:cotrack/pages/calendar/monthly_view_comp.dart';
 import 'package:cotrack/pages/pages.dart';
-import 'package:cotrack/pages/stats/daily_transactions_screen.dart';
 import 'package:cotrack/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
@@ -144,25 +143,6 @@ class CalendarScreen extends StatelessWidget {
       ),
     );
   }
-}
-
-Future<dynamic> openDailyTransactionModal(
-    BuildContext context, DateTime date, Query<List<Transaction>> q) {
-  return showModalBottomSheet(
-      isScrollControlled: true,
-      enableDrag: true,
-      context: context,
-      builder: (context) => FractionallySizedBox(
-            heightFactor: 0.7,
-            child: DailyTransactionsScreen(
-              date: date,
-              onDismiss: (value) async {
-                if (value.refresh) {
-                  await q.refetch();
-                }
-              },
-            ),
-          ));
 }
 
 Future<dynamic> openAddTransactionModal(BuildContext context, DateTime date) {

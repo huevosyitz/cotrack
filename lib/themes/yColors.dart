@@ -8,6 +8,7 @@ class yColors {
   static const primaryTextFade2 = Color.fromARGB(255, 110, 114, 126);
   static const secondary = Color(0xfff16777);
   static const tertiary = Color(0xff6bde84);
+  static const neutral = Color.fromARGB(255, 32, 85, 165);
 
   static const background = Color(0xff181a20);
   static const background2 = Color(0xff1f2129);

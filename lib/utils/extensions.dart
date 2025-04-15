@@ -30,7 +30,6 @@ bool isValidUuid(String uuid) {
 
 String displayFormattedCurrency(double amount) {
   final formatter = NumberFormat.currency(
-    locale: 'en_US',
     symbol: '₱',
     decimalDigits: 2,
   );
