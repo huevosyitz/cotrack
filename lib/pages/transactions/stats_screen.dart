@@ -1,7 +1,9 @@
 import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:cached_query_flutter/cached_query_flutter.dart';
+import 'package:cotrack/components/components.dart';
 import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
+import 'package:cotrack/themes/yColors.dart';
 import 'package:cotrack/themes/yIcons.dart';
 import 'package:cotrack/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -74,6 +76,9 @@ class StatsScreen extends HookWidget {
                 : _generateChartDataWithColors(
                     thisMonthTransactions.values.toList());
 
+            final sum = filteredTransactions.fold<double>(
+                0, (sum, item) => sum + item.y);
+
             return Column(
               children: [
                 Row(
@@ -131,57 +136,81 @@ class StatsScreen extends HookWidget {
                     ),
                   )
                 else
-                  Expanded(
-                    child: SfCircularChart(
-                      title: ChartTitle(
-                        text: selectedTabIndex.value == 0
-                            ? 'Income ($thisMonthDisplay)'
-                            : 'Expense ($thisMonthDisplay)',
+                  SfCircularChart(
+                    margin: EdgeInsets.zero,
+                    title: ChartTitle(
+                        text:
+                            '$thisMonthDisplay (${displayFormattedCurrency(sum)})',
+                        textStyle: context.labelLarge),
+                    // legend: Legend(
+                    //   isVisible: true,
+                    //   isResponsive: true,
+                    //   overflowMode: LegendItemOverflowMode.wrap,
+                    //   position: LegendPosition.bottom,
+                    //   alignment: ChartAlignment.center,
+                    //   itemPadding: 5,
+                    //   textStyle: const TextStyle(
+                    //     fontSize: 12,
+                    //   ),
+                    // ),
+                    series: <PieSeries<ChartData, String>>[
+                      PieSeries<ChartData, String>(
+                        radius: '70%',
+                        strokeColor: Colors.black.withOpacity(0.1),
+                        strokeWidth: 1,
+                        dataSource: filteredTransactions,
+                        xValueMapper: (ChartData data, _) => data.x,
+                        yValueMapper: (ChartData data, _) => data.y,
+                        pointColorMapper: (ChartData data, _) => data.color,
+                        dataLabelSettings: const DataLabelSettings(
+                            labelIntersectAction: LabelIntersectAction.shift,
+                            isVisible: true,
+                            labelPosition: ChartDataLabelPosition.outside,
+                            labelAlignment: ChartDataLabelAlignment.bottom,
+                            textStyle: TextStyle(
+                              fontSize: 8,
+                            ),
+                            connectorLineSettings: ConnectorLineSettings(
+                                // Type of the connector line
+                                type: ConnectorType.curve)),
+                        dataLabelMapper: (ChartData data, _) {
+                          // Calculate the percentage
+                          final total = filteredTransactions.fold<double>(
+                              0, (sum, item) => sum + item.y);
+                          final percentage =
+                              ((data.y / total) * 100).toStringAsFixed(1);
+                          return '${data.x}\r\n$percentage%';
+                        },
+                        animationDuration: 500,
                       ),
-                      legend: Legend(
-                        isVisible: true,
-                        isResponsive: true,
-                        overflowMode: LegendItemOverflowMode.wrap,
-                        position: LegendPosition.bottom,
-                        alignment: ChartAlignment.center,
-                        itemPadding: 5,
-                        textStyle: const TextStyle(
-                          fontSize: 12,
-                        ),
-                      ),
-                      series: <PieSeries<ChartData, String>>[
-                        PieSeries<ChartData, String>(
-                          radius: '70%',
-                          strokeColor: Colors.black.withOpacity(0.1),
-                          strokeWidth: 1,
-                          dataSource: filteredTransactions,
-                          xValueMapper: (ChartData data, _) => data.x,
-                          yValueMapper: (ChartData data, _) => data.y,
-                          pointColorMapper: (ChartData data, _) => data.color,
-                          dataLabelSettings: const DataLabelSettings(
-                              labelIntersectAction: LabelIntersectAction.shift,
-                              isVisible: true,
-                              labelPosition: ChartDataLabelPosition.outside,
-                              labelAlignment: ChartDataLabelAlignment.bottom,
-                              textStyle: TextStyle(
-                                fontSize: 8,
-                              ),
-                              connectorLineSettings: ConnectorLineSettings(
-                                  // Type of the connector line
-                                  type: ConnectorType.curve)),
-                          dataLabelMapper: (ChartData data, _) {
-                            // Calculate the percentage
-                            final total = filteredTransactions.fold<double>(
-                                0, (sum, item) => sum + item.y);
-                            final percentage =
-                                ((data.y / total) * 100).toStringAsFixed(1);
-                            return '${data.x}\r\n$percentage%';
-                          },
-                          animationDuration: 500,
-                        ),
-                      ],
-                    ),
+                    ],
                   ),
+                const Divider(),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: filteredTransactions.length,
+                    itemBuilder: (_, index) {
+                      final data = filteredTransactions[index];
+                      return CompactListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: data.color,
+                          child: Icon(
+                            TransactionCategoryService
+                                .transactionCategoriesMap[data.id]
+                                ?.iconItem
+                                .icon,
+                            color: yColors.background,
+                          ),
+                        ),
+                        title: Text(data.x),
+                        trailing: Text(
+                          displayFormattedCurrency(data.y),
+                          style: context.labelMedium,
+                        ),
+                      );
+                    },
+                  ),
+                )
               ],
             );
           },
@@ -221,6 +250,7 @@ Map<String, Map<String, Map<String, ChartData>>>
     }
 
     final data = ChartData(
+      transaction.category_id,
       TransactionCategoryService
               .transactionCategoriesMap[transaction.category_id]?.name ??
           'Unknown',
@@ -247,23 +277,11 @@ List<ChartData> _generateChartDataWithColors(List<ChartData> transactions) {
     final index = transactions.indexOf(data) % colors.length;
     final color = colors[index];
 
-    return ChartData(data.x, data.y, color);
+    return ChartData(data.id, data.x, data.y, color);
   }).toList();
 }
 
 List<Color> colors = [
-  Color(0xfffe6f63),
-  Color(0xfffe9650),
-  Color(0xffffd041),
-  Color(0xffffe800),
-  Color(0xffc1e745),
-  Color(0xff72d36c),
-  Color(0xff66e9db),
-  Color(0xff73b8e2),
-  Color(0xff73b8e2),
-  Color(0xffa589d6),
-  Color(0xffec7ddc),
-  Color(0xffe373a3),
   Color(0xfffe6f63),
   Color(0xfffe9650),
   Color(0xffffd041),
@@ -300,7 +318,8 @@ Color? lerpMultiColor(double t) {
 }
 
 class ChartData {
-  ChartData(this.x, this.y, [this.color]);
+  ChartData(this.id, this.x, this.y, [this.color]);
+  final int id;
   final String x;
   double y;
   final Color? color;
