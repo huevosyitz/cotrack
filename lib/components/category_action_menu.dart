@@ -2,7 +2,7 @@ import 'package:cotrack/components/components.dart';
 import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
 import 'package:cotrack/pages/category/add_edit_category_screen.dart';
-import 'package:cotrack/pages/transactions/add_edit_transaction_modal_screen.dart';
+import 'package:cotrack/pages/stats/add_edit_transaction_modal_screen.dart';
 import 'package:cotrack/themes/themes.dart';
 import 'package:cotrack/utils/deviceUtils.dart';
 import 'package:flutter/material.dart';

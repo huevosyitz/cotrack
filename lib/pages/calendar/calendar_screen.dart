@@ -4,13 +4,13 @@ import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/pages/calendar/daily_transactions_view.dart';
 import 'package:cotrack/pages/calendar/monthly_view_comp.dart';
 import 'package:cotrack/pages/pages.dart';
-import 'package:cotrack/pages/transactions/daily_transactions_screen.dart';
+import 'package:cotrack/pages/stats/daily_transactions_screen.dart';
 import 'package:cotrack/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
 
 import 'package:cotrack/core/services/services.dart';
-import 'package:cotrack/pages/transactions/add_edit_transaction_modal_screen.dart';
+import 'package:cotrack/pages/stats/add_edit_transaction_modal_screen.dart';
 import 'package:cotrack/themes/themes.dart';
 
 const List<String> months = [

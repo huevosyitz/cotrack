@@ -5,5 +5,5 @@ export 'category/add_edit_category_screen.dart';
 export 'home/home_screen.dart';
 export 'notifications.dart';
 export 'settings/settings_screen.dart';
-export 'transactions/add_edit_transaction_modal_screen.dart';
-export 'transactions/stats_screen.dart';
+export 'stats/add_edit_transaction_modal_screen.dart';
+export 'stats/stats_screen.dart';

@@ -1,4 +1,5 @@
 import 'package:cached_query_flutter/cached_query_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 final _uuid = Uuid();
@@ -25,4 +26,13 @@ bool isValidUuid(String uuid) {
   final regex = RegExp(
       r'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$');
   return regex.hasMatch(uuid);
+}
+
+String displayFormattedCurrency(double amount) {
+  final formatter = NumberFormat.currency(
+    locale: 'en_US',
+    symbol: '₱',
+    decimalDigits: 2,
+  );
+  return formatter.format(amount);
 }
