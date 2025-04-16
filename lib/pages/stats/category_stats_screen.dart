@@ -67,6 +67,10 @@ class CategoryStatsScreen extends StatelessWidget {
       },
     );
 
+    // start at the most recent month
+    axisVisibleMax = summedData.length + 1;
+    axisVisibleMin = axisVisibleMax - xAxisVisible;
+
     void performSwipe(ChartSwipeDirection direction) {
       if (direction == ChartSwipeDirection.end) {
         if ((axisVisibleMax + xAxisVisible) < summedData.length) {
