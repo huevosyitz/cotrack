@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:cotrack/components/components.dart';
@@ -7,7 +8,9 @@ import 'package:cotrack/pages/calendar/transaction_list_view.dart';
 import 'package:cotrack/pages/stats/models/category_stats.dart';
 import 'package:cotrack/themes/themes.dart';
 import 'package:cotrack/utils/extensions.dart';
+import 'package:cotrack/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:watch_it/watch_it.dart';
@@ -15,11 +18,15 @@ import 'package:watch_it/watch_it.dart';
 class CategoryStatsScreen extends StatelessWidget {
   final transactionService = di.get<TransactionService>();
   CategoryAxisController? _axisController;
-  final double xAxisVisible = 8;
+  final int xAxisVisible = 6;
   double axisVisibleMin = -1, axisVisibleMax = 7;
-  final selectedMonth = ValueNotifier<String?>(null);
+  final selectedMonth = ValueNotifier<DateTime?>(null);
   final int categoryId;
-  late ChartSeriesController _chartSeriesController;
+  final ZoomPanBehavior _zoomPanBehavior = ZoomPanBehavior(
+    enablePanning: true,
+    enablePinching: true,
+    zoomMode: ZoomMode.x,
+  );
 
   CategoryStatsScreen({super.key, required this.categoryId});
 
@@ -54,7 +61,6 @@ class CategoryStatsScreen extends StatelessWidget {
         }
 
         final transactionList = state.data as List<Transaction>;
-        final newkey = generateUuid();
 
         final transactions =
             transactionList.where((e) => e.category_id == categoryId).toList();
@@ -68,8 +74,7 @@ class CategoryStatsScreen extends StatelessWidget {
         final category =
             TransactionCategoryService.transactionCategoriesMap[categoryId]!;
 
-        final summedData =
-            _sumTransactionsByMonth(transactions).values.toList();
+        final chartData = _sumTransactionsByMonth(transactions).values.toList();
         final groupedData = _groupTransactionsByMonth(transactions);
 
         final minTransactionDate = transactions
@@ -80,63 +85,29 @@ class CategoryStatsScreen extends StatelessWidget {
             .reduce((a, b) => a.isAfter(b) ? a : b);
 
         // generate months starting from the minTransactionDate to maxTransactionDate
-        final months = <String>[];
+        final months = <DateTime>[];
         DateTime currentDate =
             DateTime(minTransactionDate.year, minTransactionDate.month);
         DateTime endDate =
             DateTime(maxTransactionDate.year, maxTransactionDate.month + 1);
         while (currentDate.isBefore(endDate)) {
-          months.add(DateFormat('yyyy-MM').format(currentDate));
+          months.add(currentDate);
           currentDate = DateTime(currentDate.year, currentDate.month + 1);
         }
 
         // fill in missing months with 0 values
         for (var month in months) {
-          if (!summedData.any((data) => data.month == month)) {
-            summedData.add(CategoryChartData(month, 0));
+          if (!chartData.any((data) => data.month == month)) {
+            chartData.add(CategoryChartData(month, 0));
           }
         }
+
         // Sort again after adding missing months
-        summedData.sort(
+        chartData.sort(
           (a, b) {
-            // Sort by month in descending order
-            DateTime dateA = DateFormat('yyyy-MM').parse(a.month);
-            DateTime dateB = DateFormat('yyyy-MM').parse(b.month);
-            return dateA.compareTo(dateB); // Descending order
+            return a.month.compareTo(b.month); // Descending order
           },
         );
-
-        void performSwipe(ChartSwipeDirection direction) {
-          if (direction == ChartSwipeDirection.end) {
-            if ((axisVisibleMax + xAxisVisible) < summedData.length) {
-              axisVisibleMin = axisVisibleMin + xAxisVisible;
-              axisVisibleMax = axisVisibleMax + xAxisVisible;
-            } else {
-              axisVisibleMin = summedData.length - xAxisVisible + 1;
-              axisVisibleMax = summedData.length + 1.toDouble();
-            }
-          } else if (direction == ChartSwipeDirection.start) {
-            if ((axisVisibleMin - xAxisVisible) >= 0) {
-              axisVisibleMin = axisVisibleMin - xAxisVisible;
-              axisVisibleMax = axisVisibleMax - xAxisVisible;
-            } else {
-              axisVisibleMin = -1;
-              axisVisibleMax = xAxisVisible - 1;
-            }
-          }
-
-          _axisController!.visibleMaximum = axisVisibleMax;
-          _axisController!.visibleMinimum = axisVisibleMin;
-        }
-
-        // start at the most recent month
-        axisVisibleMax = summedData.length + 1;
-        axisVisibleMin = axisVisibleMax - xAxisVisible;
-
-        // _chartSeriesController.updateDataSource(
-        //   addedDataIndexes: [summedData.length - 1],
-        //   removedDataIndexes: [0],
-        // );
 
         return Scaffold(
           appBar: AppBar(
@@ -145,22 +116,19 @@ class CategoryStatsScreen extends StatelessWidget {
           body: Column(
             children: [
               SfCartesianChart(
-                // key: Key(newkey),
-                primaryXAxis: CategoryAxis(
+                zoomPanBehavior: _zoomPanBehavior,
+                primaryXAxis: DateTimeCategoryAxis(
+                  dateFormat: DateFormat('yyyy-MMM'),
                   labelStyle: const TextStyle(fontSize: 8),
-                  majorGridLines: const MajorGridLines(width: 0),
                   labelRotation: 45,
-                  initialVisibleMinimum: axisVisibleMin,
-                  initialVisibleMaximum: axisVisibleMax,
-                  onRendererCreated: (CategoryAxisController controller) {
-                    _axisController = controller;
-                  },
-                  axisLabelFormatter: (AxisLabelRenderDetails args) {
-                    final month = DateFormat('yyyy-MMM').format(
-                      DateFormat('yyyy-MM').parse(args.text),
-                    );
-                    return ChartAxisLabel(month, const TextStyle(fontSize: 8));
-                  },
+                  labelPlacement: LabelPlacement.betweenTicks,
+                  intervalType: DateTimeIntervalType.months,
+                  interval: 1,
+                  minimum: chartData.first.month,
+                  maximum: chartData.last.month,
+                  initialVisibleMinimum:
+                      chartData.last.month.subtractMonths(xAxisVisible - 1),
+                  initialVisibleMaximum: chartData.last.month,
                 ),
                 primaryYAxis: NumericAxis(
                   labelFormat: '{value}',
@@ -174,23 +142,18 @@ class CategoryStatsScreen extends StatelessWidget {
                 ),
                 // Columns will be rendered back to back
                 enableSideBySideSeriesPlacement: false,
-                onPlotAreaSwipe: (ChartSwipeDirection direction) =>
-                    performSwipe(direction),
-                series: <CartesianSeries<CategoryChartData, String>>[
-                  ColumnSeries<CategoryChartData, String>(
+                series: <CartesianSeries<CategoryChartData, DateTime>>[
+                  ColumnSeries<CategoryChartData, DateTime>(
                     animationDuration: 500,
-                    dataSource: [...summedData],
+                    dataSource: [...chartData],
                     xValueMapper: (CategoryChartData data, _) => data.month,
                     yValueMapper: (CategoryChartData data, _) =>
                         data.totalAmount,
                     color: _colorMap[category.transactionType],
-                    onRendererCreated: (ChartSeriesController controller) {
-                      _chartSeriesController = controller;
-                    },
                     onPointTap: (pointInteractionDetails) {
                       final pointIndex = pointInteractionDetails.pointIndex;
                       if (pointIndex != null) {
-                        final tappedData = summedData[pointIndex];
+                        final tappedData = chartData[pointIndex];
                         // Handle the tap event here
 
                         selectedMonth.value = tappedData.month;
@@ -217,7 +180,7 @@ class CategoryStatsScreen extends StatelessWidget {
                       );
                     }
 
-                    final transactionList = groupedData[month] ?? [];
+                    final transactionList = groupedData[month.yyyyMM()] ?? [];
 
                     final sum = transactionList.fold(
                         0.0, (sum, item) => sum + item.amount);
@@ -234,8 +197,7 @@ class CategoryStatsScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              DateFormat('yyyy-MMM')
-                                  .format(DateTime.parse("$month-01")),
+                              DateFormat('yyyy-MMMM').format(month),
                               style: context.bodyLarge,
                             ),
                             Text(
@@ -271,22 +233,6 @@ class CategoryStatsScreen extends StatelessWidget {
                         ],
                       ),
                     );
-
-                    // if (groupedData[selectedMonth.value]?.isEmpty ?? true) {
-                    //   return Expanded(
-                    //     child: Center(
-                    //       child: Text(
-                    //         'No transactions for $selectedMonth',
-                    //         style: context.labelMedium,
-                    //       ),
-                    //     ),
-                    //   );
-                    // } else {
-                    //   return Expanded(
-                    //       child: TransactionListView(
-                    //     transactionList: groupedData[selectedMonth.value]!,
-                    //   ));
-                    // }
                   }),
             ],
           ),
@@ -307,7 +253,7 @@ Map<String, CategoryChartData> _sumTransactionsByMonth(
     // Initialize the month group if it doesn't exist
     if (!groupedData.containsKey(month)) {
       groupedData[month] = CategoryChartData(
-        month,
+        transaction.transaction_date.firstDayOfMonth(),
         transaction.amount,
       );
     } else {
@@ -338,7 +284,7 @@ Map<String, List<Transaction>> _groupTransactionsByMonth(
 }
 
 class CategoryChartData {
-  final String month;
+  final DateTime month;
   double totalAmount;
 
   CategoryChartData(this.month, this.totalAmount);

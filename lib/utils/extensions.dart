@@ -35,3 +35,4 @@ String displayFormattedCurrency(double amount) {
   );
   return formatter.format(amount);
 }
+
