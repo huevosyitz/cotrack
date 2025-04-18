@@ -5,7 +5,6 @@ import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
 import 'package:cotrack/pages/stats/category_stats.dart';
 import 'package:cotrack/pages/stats/category_stats_screen.dart';
-import 'package:cotrack/pages/stats/scrolling.dart';
 import 'package:cotrack/themes/yColors.dart';
 import 'package:cotrack/themes/yIcons.dart';
 import 'package:cotrack/utils/utils.dart';

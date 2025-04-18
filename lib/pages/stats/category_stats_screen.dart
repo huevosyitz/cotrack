@@ -139,14 +139,12 @@ class CategoryStatsScreen extends StatelessWidget {
                   final pointIndex = pointInteractionDetails.pointIndex;
                   if (pointIndex != null) {
                     final tappedData = summedData[pointIndex];
-                    if (tappedData != null) {
-                      // Handle the tap event here
+                    // Handle the tap event here
 
-                      selectedMonth.value = tappedData.month;
-                      print(
-                          'Tapped on ${tappedData.month} with amount: ${tappedData.totalAmount}');
-                    }
-                  }
+                    selectedMonth.value = tappedData.month;
+                    print(
+                        'Tapped on ${tappedData.month} with amount: ${tappedData.totalAmount}');
+                                    }
                 },
               ),
             ],

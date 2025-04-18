@@ -10,7 +10,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 /// Renders the chart with default trackball sample.
 class Scrolling extends StatefulWidget {
   /// Creates the chart with default trackball sample.
-  const Scrolling();
+  const Scrolling({super.key});
 
   @override
   _ScrollingState createState() => _ScrollingState();
@@ -44,7 +44,7 @@ class _ScrollingState extends State<Scrolling> {
     return Scaffold(
         appBar: AppBar(),
         body: Center(
-            child: Container(
+            child: SizedBox(
                 height: 500,
                 width: 320,
                 child: _buildInfiniteScrollingChart())));
