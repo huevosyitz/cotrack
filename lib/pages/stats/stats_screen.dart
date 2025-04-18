@@ -3,7 +3,7 @@ import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:cotrack/components/components.dart';
 import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
-import 'package:cotrack/pages/stats/category_stats.dart';
+import 'package:cotrack/pages/stats/models/category_stats.dart';
 import 'package:cotrack/pages/stats/category_stats_screen.dart';
 import 'package:cotrack/themes/yColors.dart';
 import 'package:cotrack/themes/yIcons.dart';
@@ -198,12 +198,7 @@ class StatsScreen extends HookWidget {
                           isScrollControlled: true,
                           context: context,
                           // builder: (context) => Scrolling(),
-                          builder: (context) => CategoryStatsScreen(
-                            transactions: transactionList
-                                .where((e) =>
-                                    e.category_id == categoryStat.categoryId)
-                                .toList(),
-                          ),
+                          builder: (context) => CategoryStatsScreen(categoryId: categoryStat.categoryId,),
                         ),
                         leading: CircleAvatar(
                           backgroundColor: categoryStat.color,
