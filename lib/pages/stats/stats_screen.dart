@@ -5,6 +5,7 @@ import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
 import 'package:cotrack/pages/stats/view_models/category_stats.dart';
 import 'package:cotrack/pages/stats/category_stats_screen.dart';
+import 'package:cotrack/pages/stats/widgets/category_stats_transaction_item.dart';
 import 'package:cotrack/themes/yColors.dart';
 import 'package:cotrack/themes/yIcons.dart';
 import 'package:cotrack/utils/utils.dart';
@@ -30,7 +31,7 @@ class StatsScreen extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selectedYearMonth = useState(DateTime.now());
+    final selectedDateTime = useState(DateTime.now());
     final selectedTabIndex = useState(statsTabs.indexOf(StatsTabs.expense));
     final selectedInterval = useState(StatsInterval.month);
 
@@ -62,46 +63,47 @@ class StatsScreen extends HookWidget {
             final transactionList = state.data as List<Transaction>;
 
             // Group transactions by month and category
-            final groupedTransactions =
-                _groupTransactionsByMonthAndCategory(transactionList);
+            final groupedTransactions = _groupTransactionsByIntervalAndCategory(
+                selectedInterval.value, transactionList);
 
-            final allGroupTransactions =
-                _groupTransactionsByTransactionType(transactionList);
+            final allGroupTransactions = _groupTransactionsByTransactionType(
+                selectedInterval.value, transactionList);
 
-            final selectedMonth =
-                DateFormat("yyyy-MM").format(selectedYearMonth.value);
-            final thisMonthDisplay =
-                DateFormat("MMMM yyyy").format(selectedYearMonth.value);
+            final selectedIntervalKey =
+                getIntervalKey(selectedInterval.value, selectedDateTime.value);
 
             final selectedTab = statsTabs[selectedTabIndex.value];
 
-            final thisMonthTransactions = selectedTab == StatsTabs.all
-                ? allGroupTransactions[selectedMonth]?.values
-                : groupedTransactions[selectedMonth]?[selectedTab.name]?.values;
+            final thisIntervalTransactions = selectedTab == StatsTabs.all
+                ? allGroupTransactions[selectedIntervalKey]?.values
+                : groupedTransactions[selectedIntervalKey]?[selectedTab.name]
+                    ?.values;
 
             // Filter transactions based on the selected tab
-            final filteredTransactions = thisMonthTransactions == null
+            final filteredTransactions = thisIntervalTransactions == null
                 ? <CategoryStats>[]
                 : _generateChartDataWithColors(
-                    thisMonthTransactions.toList(), selectedTab);
+                    thisIntervalTransactions.toList(), selectedTab);
 
-            final sum = filteredTransactions.fold<double>(
-                0, (sum, item) => sum + item.totalAmount);
+            final String headerDisplayText = generateHeaderText(
+                selectedInterval,
+                selectedDateTime.value,
+                selectedTab,
+                filteredTransactions);
 
             return Column(
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // navigate to previous or next month
                     IconButton(
                       padding: EdgeInsets.zero,
                       icon: const Icon(yIcons.arrowLeft),
                       onPressed: () {
-                        // Handle previous month action
-                        selectedYearMonth.value = DateTime(
-                          selectedYearMonth.value.year,
-                          selectedYearMonth.value.month - 1,
+                        selectedDateTime.value = addIntervalToDateTime(
+                          selectedDateTime.value,
+                          selectedInterval.value,
+                          -1,
                         );
                       },
                     ),
@@ -129,67 +131,66 @@ class StatsScreen extends HookWidget {
                     IconButton(
                       icon: const Icon(yIcons.arrowRight),
                       onPressed: () {
-                        // Handle next month action
-                        selectedYearMonth.value = DateTime(
-                          selectedYearMonth.value.year,
-                          selectedYearMonth.value.month + 1,
+                        selectedDateTime.value = addIntervalToDateTime(
+                          selectedDateTime.value,
+                          selectedInterval.value,
+                          1,
                         );
                       },
                     ),
                   ],
                 ),
-                if (filteredTransactions.isEmpty)
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        'No transactions for $thisMonthDisplay',
-                        style: context.labelMedium,
+                Column(
+                  children: [
+                    Padding(
+                      padding:
+                          const EdgeInsets.only(top: 16, left: 16, right: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            headerDisplayText,
+                            style: context.titleMedium,
+                          ),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            width: 120,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.grey),
+                            ),
+                            child: DropdownButton<StatsInterval>(
+                              isDense: true,
+                              isExpanded: true,
+                              hint: Text("Select a fruit"),
+                              value: selectedInterval.value,
+                              onChanged: (StatsInterval? newValue) {
+                                selectedInterval.value = newValue!;
+                              },
+                              items: StatsInterval.values
+                                  .map<DropdownMenuItem<StatsInterval>>(
+                                      (StatsInterval value) {
+                                return DropdownMenuItem<StatsInterval>(
+                                  value: value,
+                                  child: Text(value.name.capitalizeFirst),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  )
-                else
-                  Column(
-                    children: [
-                      Padding(
-                        padding:
-                            const EdgeInsets.only(top: 16, left: 16, right: 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              selectedTab == StatsTabs.all
-                                  ? thisMonthDisplay
-                                  : '$thisMonthDisplay (${displayFormattedCurrency(sum)})',
-                              style: context.labelLarge,
-                            ),
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 12),
-                              width: 130,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.grey),
-                              ),
-                              child: DropdownButton<StatsInterval>(
-                                isDense: true,
-                                isExpanded: true,
-                                hint: Text("Select a fruit"),
-                                value: selectedInterval.value,
-                                onChanged: (StatsInterval? newValue) {
-                                  selectedInterval.value = newValue!;
-                                },
-                                items: StatsInterval.values
-                                    .map<DropdownMenuItem<StatsInterval>>(
-                                        (StatsInterval value) {
-                                  return DropdownMenuItem<StatsInterval>(
-                                    value: value,
-                                    child: Text(value.name.capitalizeFirst),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                          ],
+                    if (filteredTransactions.isEmpty)
+                      SizedBox(
+                        height: 300,
+                        child: Center(
+                          child: Text(
+                            'No transactions for "$selectedIntervalKey"',
+                            style: context.labelMedium,
+                          ),
                         ),
-                      ),
+                      )
+                    else
                       SfCircularChart(
                         margin: EdgeInsets.zero,
                         series: <PieSeries<CategoryStats, String>>[
@@ -229,8 +230,8 @@ class StatsScreen extends HookWidget {
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                  ],
+                ),
                 const Divider(),
                 Expanded(
                   child: ListView.builder(
@@ -249,196 +250,209 @@ class StatsScreen extends HookWidget {
       ),
     );
   }
-}
 
-class CategoryStatsTransactionItem extends StatelessWidget {
-  const CategoryStatsTransactionItem({
-    super.key,
-    required this.categoryStat,
-    required this.selectedTab,
-  });
-
-  final CategoryStats categoryStat;
-  final StatsTabs selectedTab;
-
-  @override
-  Widget build(BuildContext context) {
-    var avatarIcon = selectedTab == StatsTabs.all
-        ? (TransactionCategoryService
-                    .transactionCategoriesMap[categoryStat.categoryId]
-                    ?.transactionType ==
-                TransactionType.income
-            ? yIcons.income
-            : yIcons.expense)
-        : TransactionCategoryService
-            .transactionCategoriesMap[categoryStat.categoryId]!.iconItem.icon;
-
-    return CompactListTile(
-      onTap: () => showModalBottomSheet(
-        isScrollControlled: true,
-        context: context,
-        builder: (context) => selectedTab == StatsTabs.all
-            ? CategoryStatsScreen(
-                transactionType: TransactionCategoryService
-                    .transactionCategoriesMap[categoryStat.categoryId]!
-                    .transactionType,
-              )
-            : CategoryStatsScreen(
-                categoryId: categoryStat.categoryId,
-              ),
-      ),
-      leading: CircleAvatar(
-        backgroundColor: categoryStat.color,
-        child: Icon(
-          avatarIcon,
-          color: yColors.background,
-        ),
-      ),
-      title: Text(categoryStat.categoryName),
-      trailing: Text(
-        displayFormattedCurrency(categoryStat.totalAmount),
-        style: context.labelMedium,
-      ),
-    );
-  }
-}
-
-Map<String, Map<String, CategoryStats>> _groupTransactionsByTransactionType(
-    List<Transaction> transactions) {
-  Map<String, Map<String, CategoryStats>> groupedData = {};
-
-  for (var transaction in transactions) {
-    // Format the transaction date to get the month (e.g., "January 2023")
-    String month = DateFormat('yyyy-MM').format(transaction.transaction_date);
-
-    // Get the category name
-    TransactionType transactionType = TransactionCategoryService
-        .transactionCategoriesMap[transaction.category_id]!.transactionType;
-
-    // Initialize the month group if it doesn't exist
-    if (!groupedData.containsKey(month)) {
-      groupedData[month] = {};
+  DateTime addIntervalToDateTime(
+      DateTime dateTime, StatsInterval interval, int count) {
+    switch (interval) {
+      case StatsInterval.week:
+        return count > 0
+            ? dateTime.addWeeks(count)
+            : dateTime.subtractWeeks(-count);
+      case StatsInterval.month:
+        return count > 0
+            ? dateTime.addMonths(count)
+            : dateTime.subtractMonths(-count);
+      case StatsInterval.year:
+        return DateTime(dateTime.year + count);
     }
+  }
 
-    final data = CategoryStats(
-      transaction.category_id,
-      transactionType == TransactionType.income ? "Income" : "Expense",
-      transaction.amount,
-      statsTab: transactionType.toStatsTab(),
-    );
+  String generateHeaderText(
+      ValueNotifier<StatsInterval> selectedInterval,
+      DateTime selectedDateTime,
+      StatsTabs selectedTab,
+      List<CategoryStats> filteredTransactions) {
+    final String displayText =
+        getIntervalKey(selectedInterval.value, selectedDateTime);
 
-    // Initialize the category group if it doesn't exist
-    if (!groupedData[month]!.containsKey(transactionType.name)) {
-      groupedData[month]![transactionType.name] = data;
+    if (selectedTab == StatsTabs.all) {
+      return displayText;
     } else {
-      groupedData[month]![transactionType.name]!.totalAmount +=
-          transaction.amount;
+      final sum = filteredTransactions.fold<double>(
+          0, (sum, item) => sum + item.totalAmount);
+      return '$displayText (${displayFormattedCurrency(sum)})';
     }
   }
 
-  return groupedData;
-}
+  String getIntervalKey(
+      StatsInterval selectedInterval, DateTime selectedDateTime) {
+    switch (selectedInterval) {
+      case StatsInterval.week:
+        return selectedDateTime.yearMonthWeek();
+      case StatsInterval.month:
+        return DateFormat("MMM yyyy").format(selectedDateTime);
+      case StatsInterval.year:
+        return selectedDateTime.year.toString();
+    }
+  }
 
-Map<String, Map<String, Map<String, CategoryStats>>>
-    _groupTransactionsByMonthAndCategory(List<Transaction> transactions) {
-  Map<String, Map<String, Map<String, CategoryStats>>> groupedData = {};
+  Map<String, Map<String, CategoryStats>> _groupTransactionsByTransactionType(
+      StatsInterval interval, List<Transaction> transactions) {
+    Map<String, Map<String, CategoryStats>> groupedData = {};
 
-  for (var transaction in transactions) {
-    // Format the transaction date to get the month (e.g., "January 2023")
-    String month = DateFormat('yyyy-MM').format(transaction.transaction_date);
+    for (var transaction in transactions) {
+      // Format the transaction date to get the month (e.g., "January 2023")
 
-    // Get the category name
-    TransactionType transactionType = TransactionCategoryService
-        .transactionCategoriesMap[transaction.category_id]!.transactionType;
+      String intervalKey =
+          getIntervalKey(interval, transaction.transaction_date);
 
-    String categoryName = TransactionCategoryService
-            .transactionCategoriesMap[transaction.category_id]?.name ??
-        'Unknown';
+      // String intervalKey = DateFormat('yyyy-MM').format(transaction.transaction_date);
 
-    // Initialize the month group if it doesn't exist
-    if (!groupedData.containsKey(month)) {
-      groupedData[month] = {};
+      // Get the category name
+      TransactionType transactionType = TransactionCategoryService
+          .transactionCategoriesMap[transaction.category_id]!.transactionType;
+
+      // Initialize the month group if it doesn't exist
+      if (!groupedData.containsKey(intervalKey)) {
+        groupedData[intervalKey] = {};
+      }
+
+      final data = CategoryStats(
+        transaction.category_id,
+        transactionType == TransactionType.income ? "Income" : "Expense",
+        transaction.amount,
+        statsTab: transactionType.toStatsTab(),
+      );
+
+      // Initialize the category group if it doesn't exist
+      if (!groupedData[intervalKey]!.containsKey(transactionType.name)) {
+        groupedData[intervalKey]![transactionType.name] = data;
+      } else {
+        groupedData[intervalKey]![transactionType.name]!.totalAmount +=
+            transaction.amount;
+      }
     }
 
-    // Initialize the category group if it doesn't exist
-    if (!groupedData[month]!.containsKey(transactionType.name)) {
-      groupedData[month]![transactionType.name] = {};
-    }
+    return groupedData;
+  }
 
-    final data = CategoryStats(
-      transaction.category_id,
-      TransactionCategoryService
+  Map<String, Map<String, Map<String, CategoryStats>>>
+      _groupTransactionsByIntervalAndCategory(
+          StatsInterval interval, List<Transaction> transactions) {
+    Map<String, Map<String, Map<String, CategoryStats>>> groupedData = {};
+
+    for (var transaction in transactions) {
+      // Format the transaction date to get the month (e.g., "January 2023")
+      String intervalKey =
+          getIntervalKey(interval, transaction.transaction_date);
+
+      // switch (interval) {
+      //   case StatsInterval.week:
+      //     intervalKey = transaction.transaction_date.yyyyWeek();
+      //     break;
+      //   case StatsInterval.month:
+      //     intervalKey =
+      //         DateFormat('yyyy-MM').format(transaction.transaction_date);
+      //     break;
+      //   case StatsInterval.year:
+      //     intervalKey = transaction.transaction_date.year.toString();
+      //     break;
+      // }
+
+      // Get the category name
+      TransactionType transactionType = TransactionCategoryService
+          .transactionCategoriesMap[transaction.category_id]!.transactionType;
+
+      String categoryName = TransactionCategoryService
               .transactionCategoriesMap[transaction.category_id]?.name ??
-          'Unknown',
-      transaction.amount,
-      statsTab: transactionType.toStatsTab(),
-    );
+          'Unknown';
 
-    if (!groupedData[month]![transactionType.name]!.containsKey(categoryName)) {
-      groupedData[month]![transactionType.name]![categoryName] = data;
-    } else {
-      groupedData[month]![transactionType.name]![categoryName]!.totalAmount +=
-          transaction.amount;
-    }
-  }
+      // Initialize the month group if it doesn't exist
+      if (!groupedData.containsKey(intervalKey)) {
+        groupedData[intervalKey] = {};
+      }
 
-  return groupedData;
-}
+      // Initialize the category group if it doesn't exist
+      if (!groupedData[intervalKey]!.containsKey(transactionType.name)) {
+        groupedData[intervalKey]![transactionType.name] = {};
+      }
 
-List<CategoryStats> _generateChartDataWithColors(
-    List<CategoryStats> categoryStatList, StatsTabs statTab) {
-  // Sort transactions by amount (descending)
-  categoryStatList.sort((a, b) => b.totalAmount.compareTo(a.totalAmount));
+      final data = CategoryStats(
+        transaction.category_id,
+        TransactionCategoryService
+                .transactionCategoriesMap[transaction.category_id]?.name ??
+            'Unknown',
+        transaction.amount,
+        statsTab: transactionType.toStatsTab(),
+      );
 
-  return categoryStatList.map((data) {
-    // use the colors list to get the color based on the index
-    final index = categoryStatList.indexOf(data) % yColorPallete.length;
-    // Get the category name
-    TransactionType transactionType = TransactionCategoryService
-        .transactionCategoriesMap[data.categoryId]!.transactionType;
-
-    Color color;
-
-    final greenColorIndex = 5;
-    final redishColorIndex = 0;
-
-    switch (transactionType) {
-      case TransactionType.income:
-        color = statTab == StatsTabs.all
-            ? yColorPallete[greenColorIndex]
-            : yColorPallete[greenColorIndex + index];
-        break;
-      case TransactionType.expense:
-        color = statTab == StatsTabs.all
-            ? yColorPallete[redishColorIndex]
-            : yColorPallete[index + redishColorIndex];
-      default:
-        color = yColorPallete[index];
+      if (!groupedData[intervalKey]![transactionType.name]!
+          .containsKey(categoryName)) {
+        groupedData[intervalKey]![transactionType.name]![categoryName] = data;
+      } else {
+        groupedData[intervalKey]![transactionType.name]![categoryName]!
+            .totalAmount += transaction.amount;
+      }
     }
 
-    return CategoryStats(data.categoryId, data.categoryName, data.totalAmount,
-        color: color, statsTab: data.statsTab ?? statTab);
-  }).toList();
-}
-
-Color? lerpMultiColor(double t) {
-  int numColors = yColorPallete.length;
-
-  // Clamp t between 0 and 1
-  t = t.clamp(0.0, 1.0);
-
-  // Determine the segment index
-  int segment = (t * (numColors - 1)).floor();
-
-  // Calculate the interpolation value within the segment
-  double segmentT = t * (numColors - 1) - segment;
-
-  final nextSegment = segment + 1;
-  if (nextSegment >= numColors) {
-    return yColorPallete[segment];
+    return groupedData;
   }
 
-  // Lerp between the appropriate colors
-  return Color.lerp(
-      yColorPallete[segment], yColorPallete[segment + 1], segmentT);
+  List<CategoryStats> _generateChartDataWithColors(
+      List<CategoryStats> categoryStatList, StatsTabs statTab) {
+    // Sort transactions by amount (descending)
+    categoryStatList.sort((a, b) => b.totalAmount.compareTo(a.totalAmount));
+
+    return categoryStatList.map((data) {
+      // use the colors list to get the color based on the index
+      final index = categoryStatList.indexOf(data) % yColorPallete.length;
+      // Get the category name
+      TransactionType transactionType = TransactionCategoryService
+          .transactionCategoriesMap[data.categoryId]!.transactionType;
+
+      Color color;
+
+      final greenColorIndex = 5;
+      final redishColorIndex = 0;
+
+      switch (transactionType) {
+        case TransactionType.income:
+          color = statTab == StatsTabs.all
+              ? yColorPallete[greenColorIndex]
+              : yColorPallete[greenColorIndex + index];
+          break;
+        case TransactionType.expense:
+          color = statTab == StatsTabs.all
+              ? yColorPallete[redishColorIndex]
+              : yColorPallete[index + redishColorIndex];
+        default:
+          color = yColorPallete[index];
+      }
+
+      return CategoryStats(data.categoryId, data.categoryName, data.totalAmount,
+          color: color, statsTab: data.statsTab ?? statTab);
+    }).toList();
+  }
+
+  Color? lerpMultiColor(double t) {
+    int numColors = yColorPallete.length;
+
+    // Clamp t between 0 and 1
+    t = t.clamp(0.0, 1.0);
+
+    // Determine the segment index
+    int segment = (t * (numColors - 1)).floor();
+
+    // Calculate the interpolation value within the segment
+    double segmentT = t * (numColors - 1) - segment;
+
+    final nextSegment = segment + 1;
+    if (nextSegment >= numColors) {
+      return yColorPallete[segment];
+    }
+
+    // Lerp between the appropriate colors
+    return Color.lerp(
+        yColorPallete[segment], yColorPallete[segment + 1], segmentT);
+  }
 }
