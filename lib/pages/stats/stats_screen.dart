@@ -1,10 +1,8 @@
 import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:cached_query_flutter/cached_query_flutter.dart';
-import 'package:cotrack/components/components.dart';
 import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
 import 'package:cotrack/pages/stats/view_models/category_stats.dart';
-import 'package:cotrack/pages/stats/category_stats_screen.dart';
 import 'package:cotrack/pages/stats/widgets/category_stats_transaction_item.dart';
 import 'package:cotrack/themes/yColors.dart';
 import 'package:cotrack/themes/yIcons.dart';
@@ -306,8 +304,6 @@ class StatsScreen extends HookWidget {
       String intervalKey =
           getIntervalKey(interval, transaction.transaction_date);
 
-      // String intervalKey = DateFormat('yyyy-MM').format(transaction.transaction_date);
-
       // Get the category name
       TransactionType transactionType = TransactionCategoryService
           .transactionCategoriesMap[transaction.category_id]!.transactionType;
@@ -345,19 +341,6 @@ class StatsScreen extends HookWidget {
       // Format the transaction date to get the month (e.g., "January 2023")
       String intervalKey =
           getIntervalKey(interval, transaction.transaction_date);
-
-      // switch (interval) {
-      //   case StatsInterval.week:
-      //     intervalKey = transaction.transaction_date.yyyyWeek();
-      //     break;
-      //   case StatsInterval.month:
-      //     intervalKey =
-      //         DateFormat('yyyy-MM').format(transaction.transaction_date);
-      //     break;
-      //   case StatsInterval.year:
-      //     intervalKey = transaction.transaction_date.year.toString();
-      //     break;
-      // }
 
       // Get the category name
       TransactionType transactionType = TransactionCategoryService
