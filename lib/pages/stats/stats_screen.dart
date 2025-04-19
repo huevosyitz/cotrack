@@ -3,6 +3,7 @@ import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
 import 'package:cotrack/pages/stats/view_models/category_stats.dart';
+import 'package:cotrack/pages/stats/view_models/stats_interval.dart';
 import 'package:cotrack/pages/stats/widgets/category_stats_transaction_item.dart';
 import 'package:cotrack/themes/yColors.dart';
 import 'package:cotrack/themes/yIcons.dart';
@@ -12,12 +13,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:watch_it/watch_it.dart';
-
-enum StatsInterval {
-  week,
-  month,
-  year,
-}
 
 class StatsScreen extends HookWidget {
   final transactionService = di.get<TransactionService>();
@@ -236,6 +231,7 @@ class StatsScreen extends HookWidget {
                     itemCount: filteredTransactions.length,
                     itemBuilder: (_, index) {
                       return CategoryStatsTransactionItem(
+                          interval: selectedInterval.value,
                           categoryStat: filteredTransactions[index],
                           selectedTab: selectedTab);
                     },
@@ -279,18 +275,6 @@ class StatsScreen extends HookWidget {
       final sum = filteredTransactions.fold<double>(
           0, (sum, item) => sum + item.totalAmount);
       return '$displayText (${displayFormattedCurrency(sum)})';
-    }
-  }
-
-  String getIntervalKey(
-      StatsInterval selectedInterval, DateTime selectedDateTime) {
-    switch (selectedInterval) {
-      case StatsInterval.week:
-        return selectedDateTime.yearMonthWeek();
-      case StatsInterval.month:
-        return DateFormat("MMM yyyy").format(selectedDateTime);
-      case StatsInterval.year:
-        return selectedDateTime.year.toString();
     }
   }
 
@@ -437,5 +421,17 @@ class StatsScreen extends HookWidget {
     // Lerp between the appropriate colors
     return Color.lerp(
         yColorPallete[segment], yColorPallete[segment + 1], segmentT);
+  }
+}
+
+String getIntervalKey(
+    StatsInterval selectedInterval, DateTime selectedDateTime) {
+  switch (selectedInterval) {
+    case StatsInterval.week:
+      return selectedDateTime.yearMonthWeek();
+    case StatsInterval.month:
+      return DateFormat("MMM yyyy").format(selectedDateTime);
+    case StatsInterval.year:
+      return selectedDateTime.year.toString();
   }
 }

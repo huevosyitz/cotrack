@@ -4,6 +4,8 @@ import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
 import 'package:cotrack/pages/calendar/transaction_list_view.dart';
 import 'package:cotrack/pages/calendar/view_models/transaction_list_view_sort_field.dart';
+import 'package:cotrack/pages/stats/stats_screen.dart';
+import 'package:cotrack/pages/stats/view_models/stats_interval.dart';
 import 'package:cotrack/themes/themes.dart';
 import 'package:cotrack/utils/utils.dart';
 import 'package:cotrack/viewModels/sort_by.dart';
@@ -19,13 +21,19 @@ class CategoryStatsScreen extends StatelessWidget {
   final selectedMonth = ValueNotifier<DateTime?>(null);
   final int? categoryId;
   final TransactionType? transactionType;
+  final StatsInterval interval;
   final ZoomPanBehavior _zoomPanBehavior = ZoomPanBehavior(
     enablePanning: true,
     enablePinching: true,
     zoomMode: ZoomMode.x,
   );
 
-  CategoryStatsScreen({super.key, this.categoryId, this.transactionType}) {
+  CategoryStatsScreen({
+    super.key,
+    required this.interval,
+    this.categoryId,
+    this.transactionType,
+  }) {
     // throw if both are null
     if (categoryId == null && transactionType == null) {
       throw ArgumentError(
@@ -96,40 +104,12 @@ class CategoryStatsScreen extends StatelessWidget {
           categoryTransaction = transactionType!;
         }
 
-        final chartData = _sumTransactionsByMonth(transactions).values.toList();
-        final groupedData = _groupTransactionsByMonth(transactions);
+        final groupedData =
+            _groupTransactionsByInterval(transactions, interval);
 
-        final minTransactionDate = transactions
-            .map((e) => e.transaction_date)
-            .reduce((a, b) => a.isBefore(b) ? a : b);
-        final maxTransactionDate = transactions
-            .map((e) => e.transaction_date)
-            .reduce((a, b) => a.isAfter(b) ? a : b);
+        final chartData = generateChartData(transactions, interval);
 
-        // generate months starting from the minTransactionDate to maxTransactionDate
-        final months = <DateTime>[];
-        DateTime currentDate =
-            DateTime(minTransactionDate.year, minTransactionDate.month);
-        DateTime endDate =
-            DateTime(maxTransactionDate.year, maxTransactionDate.month + 1);
-        while (currentDate.isBefore(endDate)) {
-          months.add(currentDate);
-          currentDate = DateTime(currentDate.year, currentDate.month + 1);
-        }
-
-        // fill in missing months with 0 values
-        for (var month in months) {
-          if (!chartData.any((data) => data.month == month)) {
-            chartData.add(CategoryChartData(month, 0));
-          }
-        }
-
-        // Sort again after adding missing months
-        chartData.sort(
-          (a, b) {
-            return a.month.compareTo(b.month); // Descending order
-          },
-        );
+        DateTimeCategoryAxis xAxis = getXAxisConfig(chartData);
 
         return Scaffold(
           appBar: AppBar(
@@ -139,23 +119,12 @@ class CategoryStatsScreen extends StatelessWidget {
             children: [
               SfCartesianChart(
                 zoomPanBehavior: _zoomPanBehavior,
-                primaryXAxis: DateTimeCategoryAxis(
-                  dateFormat: DateFormat('yyyy-MMM'),
-                  labelStyle: const TextStyle(fontSize: 8),
-                  labelRotation: 45,
-                  labelPlacement: LabelPlacement.betweenTicks,
-                  intervalType: DateTimeIntervalType.months,
-                  interval: 1,
-                  minimum: chartData.first.month,
-                  maximum: chartData.last.month,
-                  initialVisibleMinimum:
-                      chartData.last.month.subtractMonths(xAxisVisible - 1),
-                  initialVisibleMaximum: chartData.last.month,
-                ),
+                primaryXAxis: xAxis,
                 primaryYAxis: NumericAxis(
                   labelFormat: '{value}',
                   labelStyle: const TextStyle(fontSize: 10),
                   maximumLabels: 2,
+                  minimum: 0,
                 ),
                 tooltipBehavior: TooltipBehavior(
                   enable: true,
@@ -175,8 +144,8 @@ class CategoryStatsScreen extends StatelessWidget {
                     color: _colorMap[categoryTransaction],
                     selectionBehavior: SelectionBehavior(
                       enable: true, // Enable selection
-                      selectedBorderColor:
-                          yColors.primaryTextFade1, // Border color for selected bar
+                      selectedBorderColor: yColors
+                          .primaryTextFade1, // Border color for selected bar
                       selectedBorderWidth: 1, // Border width for selected bar
                       selectedColor: _colorMap[categoryTransaction],
                       // Optional: Change color on selection
@@ -211,7 +180,9 @@ class CategoryStatsScreen extends StatelessWidget {
                       );
                     }
 
-                    final transactionList = groupedData[month.yyyyMM()] ?? [];
+                    final intervalKey = getIntervalKey(interval, month);
+
+                    final transactionList = groupedData[intervalKey] ?? [];
 
                     final sum = transactionList.fold(
                         0.0, (sum, item) => sum + item.amount);
@@ -227,7 +198,7 @@ class CategoryStatsScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              DateFormat('yyyy-MMMM').format(month),
+                              intervalKey,
                               style: context.bodyLarge,
                             ),
                             Text(
@@ -272,44 +243,191 @@ class CategoryStatsScreen extends StatelessWidget {
       },
     );
   }
+
+  List<CategoryChartData> generateChartData(
+      List<Transaction> transactions, StatsInterval interval) {
+    final chartData =
+        _sumTransactionsByInterval(transactions, interval).values.toList();
+
+    final minTransactionDate = transactions
+        .map((e) => e.transaction_date)
+        .reduce((a, b) => a.isBefore(b) ? a : b);
+    final maxTransactionDate = transactions
+        .map((e) => e.transaction_date)
+        .reduce((a, b) => a.isAfter(b) ? a : b);
+
+    switch (interval) {
+      case StatsInterval.month:
+        // generate months starting from the minTransactionDate to maxTransactionDate
+        final months = <DateTime>[];
+        DateTime currentDate =
+            DateTime(minTransactionDate.year, minTransactionDate.month);
+        DateTime endDate =
+            DateTime(maxTransactionDate.year, maxTransactionDate.month + 1);
+        while (currentDate.isBefore(endDate)) {
+          months.add(currentDate);
+          currentDate = DateTime(currentDate.year, currentDate.month + 1);
+        }
+
+        // fill in missing months with 0 values
+        for (var month in months) {
+          if (!chartData.any((data) => data.month == month)) {
+            chartData.add(CategoryChartData(month, 0));
+          }
+        }
+
+        break;
+      case StatsInterval.year:
+        // generate years starting from the minTransactionDate to maxTransactionDate
+        final years = <DateTime>[];
+        DateTime currentDate = DateTime(minTransactionDate.year);
+        DateTime endDate = DateTime(maxTransactionDate.year + 1);
+        while (currentDate.isBefore(endDate)) {
+          years.add(currentDate);
+          currentDate = DateTime(currentDate.year + 1);
+        }
+
+        // fill in missing years with 0 values
+        for (var year in years) {
+          if (!chartData.any((data) => data.month.year == year.year)) {
+            chartData.add(CategoryChartData(year, 0));
+          }
+        }
+        break;
+
+      case StatsInterval.week:
+        // generate weeks starting from the minTransactionDate to maxTransactionDate
+        final weeks = <DateTime>[];
+        DateTime currentDate = minTransactionDate.subtractWeeks(
+            minTransactionDate.weekday - 1); // Start from the first week
+        DateTime endDate = maxTransactionDate
+            .addWeeks(7 - maxTransactionDate.weekday); // End at the last week
+        while (currentDate.isBefore(endDate)) {
+          weeks.add(currentDate);
+          currentDate = currentDate.addWeeks(1);
+        }
+
+        // fill in missing weeks with 0 values
+        for (var week in weeks) {
+          if (!chartData.any((data) => data.month == week)) {
+            chartData.add(CategoryChartData(week, 0));
+          }
+        }
+        break;
+    }
+
+    // Sort again after adding missing months
+    chartData.sort(
+      (a, b) {
+        return a.month.compareTo(b.month); // Descending order
+      },
+    );
+
+    return chartData;
+  }
+
+  DateTimeIntervalType getDateIntervalType() {
+    final DateTimeIntervalType intervalType;
+
+    switch (interval) {
+      case StatsInterval.month:
+        intervalType = DateTimeIntervalType.months;
+        break;
+      case StatsInterval.year:
+        intervalType = DateTimeIntervalType.years;
+        break;
+      case StatsInterval.week:
+        intervalType = DateTimeIntervalType.auto;
+    }
+    return intervalType;
+  }
+
+  DateTimeCategoryAxis getXAxisConfig(List<CategoryChartData> chartData) {
+    late DateTimeIntervalType intervalType;
+    late DateTime minimum;
+    late DateTime maximum;
+    late DateTime initialVisibleMinimum;
+    late DateTime initialVisibleMaximum;
+    late DateFormat dateFormat;
+
+    switch (interval) {
+      case StatsInterval.month:
+        intervalType = DateTimeIntervalType.months;
+        dateFormat = DateFormat('yyyy-MMM');
+        minimum = chartData.first.month;
+        maximum = chartData.last.month;
+        initialVisibleMinimum =
+            chartData.last.month.subtractMonths(xAxisVisible - 1);
+        initialVisibleMaximum = chartData.last.month;
+        break;
+      case StatsInterval.year:
+        dateFormat = DateFormat('yyyy');
+        intervalType = DateTimeIntervalType.years;
+        minimum = chartData.first.month;
+        maximum = chartData.last.month;
+        initialVisibleMinimum = chartData.last.month.subtractYears(4);
+        initialVisibleMaximum = chartData.last.month;
+        break;
+      case StatsInterval.week:
+        dateFormat = DateFormat('yyyy-MMM');
+        intervalType = DateTimeIntervalType.auto;
+        minimum = chartData.first.month;
+        maximum = chartData.last.month;
+        initialVisibleMinimum = chartData.last.month.subtractMonths(1);
+        initialVisibleMaximum = chartData.last.month;
+    }
+
+    return DateTimeCategoryAxis(
+      dateFormat: dateFormat,
+      labelStyle: const TextStyle(fontSize: 8),
+      labelRotation: 45,
+      labelPlacement: LabelPlacement.betweenTicks,
+      intervalType: intervalType,
+      interval: 1,
+      minimum: minimum,
+      maximum: maximum,
+      initialVisibleMinimum: initialVisibleMinimum,
+      initialVisibleMaximum: initialVisibleMaximum,
+    );
+  }
 }
 
-Map<String, CategoryChartData> _sumTransactionsByMonth(
-    List<Transaction> transactions) {
+Map<String, CategoryChartData> _sumTransactionsByInterval(
+    List<Transaction> transactions, StatsInterval interval) {
   Map<String, CategoryChartData> groupedData = {};
 
   for (var transaction in transactions) {
-    // Format the transaction date to get the month (e.g., "January 2023")
-    String month = DateFormat('yyyy-MM').format(transaction.transaction_date);
+    String intervalKey = getIntervalKey(interval, transaction.transaction_date);
 
     // Initialize the month group if it doesn't exist
-    if (!groupedData.containsKey(month)) {
-      groupedData[month] = CategoryChartData(
+    if (!groupedData.containsKey(intervalKey)) {
+      groupedData[intervalKey] = CategoryChartData(
         transaction.transaction_date.firstDayOfMonth(),
         transaction.amount,
       );
     } else {
-      groupedData[month]!.totalAmount += transaction.amount;
+      groupedData[intervalKey]!.totalAmount += transaction.amount;
     }
   }
 
   return groupedData;
 }
 
-Map<String, List<Transaction>> _groupTransactionsByMonth(
-    List<Transaction> transactions) {
+Map<String, List<Transaction>> _groupTransactionsByInterval(
+    List<Transaction> transactions, StatsInterval interval) {
   Map<String, List<Transaction>> groupedData = {};
 
   for (var transaction in transactions) {
     // Format the transaction date to get the month (e.g., "January 2023")
-    String month = DateFormat('yyyy-MM').format(transaction.transaction_date);
+    // String intervalKey = DateFormat('yyyy-MM').format(transaction.transaction_date);
+    String intervalKey = getIntervalKey(interval, transaction.transaction_date);
 
     // Initialize the month group if it doesn't exist
-    if (!groupedData.containsKey(month)) {
-      groupedData[month] = [];
+    if (!groupedData.containsKey(intervalKey)) {
+      groupedData[intervalKey] = [];
     }
 
-    groupedData[month]!.add(transaction);
+    groupedData[intervalKey]!.add(transaction);
   }
 
   return groupedData;

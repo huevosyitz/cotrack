@@ -38,6 +38,11 @@ extension DateUtils on DateTime {
     return DateTime(newYear, newMonth, newDay);
   }
 
+  DateTime subtractYears(int yearsToSubtract) {
+    return DateTime(this.year - yearsToSubtract, this.month, this.day);
+  }
+  
+
   DateTime addWeeks(int weeksToAdd) {
     return this.add(Duration(days: weeksToAdd * 7));
   }

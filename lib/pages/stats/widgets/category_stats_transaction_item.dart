@@ -4,6 +4,7 @@ import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
 import 'package:cotrack/pages/stats/category_stats_screen.dart';
 import 'package:cotrack/pages/stats/view_models/category_stats.dart';
+import 'package:cotrack/pages/stats/view_models/stats_interval.dart';
 import 'package:cotrack/themes/yColors.dart';
 import 'package:cotrack/themes/yIcons.dart';
 import 'package:cotrack/utils/utils.dart';
@@ -14,10 +15,12 @@ class CategoryStatsTransactionItem extends StatelessWidget {
     super.key,
     required this.categoryStat,
     required this.selectedTab,
+    required this.interval,
   });
 
   final CategoryStats categoryStat;
   final StatsTabs selectedTab;
+  final StatsInterval interval;
 
   @override
   Widget build(BuildContext context) {
@@ -37,11 +40,13 @@ class CategoryStatsTransactionItem extends StatelessWidget {
         context: context,
         builder: (context) => selectedTab == StatsTabs.all
             ? CategoryStatsScreen(
+                interval: interval,
                 transactionType: TransactionCategoryService
                     .transactionCategoriesMap[categoryStat.categoryId]!
                     .transactionType,
               )
             : CategoryStatsScreen(
+                interval: interval,
                 categoryId: categoryStat.categoryId,
               ),
       ),
