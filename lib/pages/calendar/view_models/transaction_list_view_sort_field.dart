@@ -1,0 +1,4 @@
+enum TransactionListViewSortField {
+  date,
+  amount,
+}

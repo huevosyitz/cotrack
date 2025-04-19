@@ -1,34 +1,37 @@
-import 'dart:math';
 import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:cached_query_flutter/cached_query_flutter.dart';
-import 'package:cotrack/components/components.dart';
 import 'package:cotrack/core/models/models.dart';
 import 'package:cotrack/core/services/services.dart';
 import 'package:cotrack/pages/calendar/transaction_list_view.dart';
-import 'package:cotrack/pages/stats/models/category_stats.dart';
+import 'package:cotrack/pages/calendar/view_models/transaction_list_view_sort_field.dart';
 import 'package:cotrack/themes/themes.dart';
-import 'package:cotrack/utils/extensions.dart';
 import 'package:cotrack/utils/utils.dart';
+import 'package:cotrack/viewModels/sort_by.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:watch_it/watch_it.dart';
 
 class CategoryStatsScreen extends StatelessWidget {
   final transactionService = di.get<TransactionService>();
-  CategoryAxisController? _axisController;
   final int xAxisVisible = 6;
   double axisVisibleMin = -1, axisVisibleMax = 7;
   final selectedMonth = ValueNotifier<DateTime?>(null);
-  final int categoryId;
+  final int? categoryId;
+  final TransactionType? transactionType;
   final ZoomPanBehavior _zoomPanBehavior = ZoomPanBehavior(
     enablePanning: true,
     enablePinching: true,
     zoomMode: ZoomMode.x,
   );
 
-  CategoryStatsScreen({super.key, required this.categoryId});
+  CategoryStatsScreen({super.key, this.categoryId, this.transactionType}) {
+    // throw if both are null
+    if (categoryId == null && transactionType == null) {
+      throw ArgumentError(
+          'Either categoryId or transactionType must be provided but not both.');
+    }
+  }
 
   final Map<TransactionType, Color> _colorMap = {
     TransactionType.expense: yColors.warn,
@@ -62,8 +65,15 @@ class CategoryStatsScreen extends StatelessWidget {
 
         final transactionList = state.data as List<Transaction>;
 
-        final transactions =
-            transactionList.where((e) => e.category_id == categoryId).toList();
+        final transactions = categoryId != null
+            ? transactionList.where((e) => e.category_id == categoryId).toList()
+            : transactionList
+                .where((e) =>
+                    TransactionCategoryService
+                        .transactionCategoriesMap[e.category_id]!
+                        .transactionType ==
+                    transactionType)
+                .toList();
 
         if (transactionList.isEmpty) {
           return const Center(
@@ -71,8 +81,20 @@ class CategoryStatsScreen extends StatelessWidget {
           );
         }
 
-        final category =
-            TransactionCategoryService.transactionCategoriesMap[categoryId]!;
+        final String appBarTitle;
+        final TransactionType categoryTransaction;
+        if (categoryId != null) {
+          final category =
+              TransactionCategoryService.transactionCategoriesMap[categoryId]!;
+          appBarTitle = category.name;
+          categoryTransaction = category.transactionType;
+        } else if (transactionType != null) {
+          appBarTitle = transactionType!.name.capitalizeFirst;
+          categoryTransaction = transactionType!;
+        } else {
+          appBarTitle = 'All Transactions';
+          categoryTransaction = transactionType!;
+        }
 
         final chartData = _sumTransactionsByMonth(transactions).values.toList();
         final groupedData = _groupTransactionsByMonth(transactions);
@@ -111,7 +133,7 @@ class CategoryStatsScreen extends StatelessWidget {
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(category.name),
+            title: Text(appBarTitle),
           ),
           body: Column(
             children: [
@@ -139,6 +161,7 @@ class CategoryStatsScreen extends StatelessWidget {
                   enable: true,
                   format: 'point.x : ₱point.y',
                   header: '',
+                  shouldAlwaysShow: true,
                 ),
                 // Columns will be rendered back to back
                 enableSideBySideSeriesPlacement: false,
@@ -149,7 +172,15 @@ class CategoryStatsScreen extends StatelessWidget {
                     xValueMapper: (CategoryChartData data, _) => data.month,
                     yValueMapper: (CategoryChartData data, _) =>
                         data.totalAmount,
-                    color: _colorMap[category.transactionType],
+                    color: _colorMap[categoryTransaction],
+                    selectionBehavior: SelectionBehavior(
+                      enable: true, // Enable selection
+                      selectedBorderColor:
+                          yColors.primaryTextFade1, // Border color for selected bar
+                      selectedBorderWidth: 1, // Border width for selected bar
+                      selectedColor: _colorMap[categoryTransaction],
+                      // Optional: Change color on selection
+                    ),
                     onPointTap: (pointInteractionDetails) {
                       final pointIndex = pointInteractionDetails.pointIndex;
                       if (pointIndex != null) {
@@ -194,7 +225,6 @@ class CategoryStatsScreen extends StatelessWidget {
                             horizontal: 16, vertical: 2),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
                               DateFormat('yyyy-MMMM').format(month),
@@ -202,8 +232,8 @@ class CategoryStatsScreen extends StatelessWidget {
                             ),
                             Text(
                               displayFormattedCurrency(sum),
-                              style: context.bodySmall!
-                                  .copyWith(color: yColors.warn),
+                              style: context.bodyMedium!.copyWith(
+                                  color: _colorMap[categoryTransaction]),
                             )
                           ],
                         ),
@@ -229,6 +259,8 @@ class CategoryStatsScreen extends StatelessWidget {
                           header,
                           TransactionListView(
                             transactionList: transactionList,
+                            sortField: TransactionListViewSortField.amount,
+                            sortOrder: SortOrder.descending,
                           ),
                         ],
                       ),

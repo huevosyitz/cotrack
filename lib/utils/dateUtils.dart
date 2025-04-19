@@ -46,6 +46,14 @@ extension DateUtils on DateTime {
     return DateFormat('yyyy-MMM').format(this);
   }
 
+  String yyyyMMdd() {
+    return DateFormat('yyyy-MM-dd').format(this);
+  }
+
+  String MMMdd() {
+    return DateFormat('MMM-dd').format(this);
+  }
+
   // to first day of month
   DateTime firstDayOfMonth() {
     return DateTime(this.year, this.month, 1);

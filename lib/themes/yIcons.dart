@@ -39,6 +39,8 @@ class yIcons {
   static const edit = FluentIcons.edit_24_regular;
   static const sort = FluentIcons.arrow_sort_24_regular;
   static const broom = FluentIcons.broom_24_regular;
+  static const income = FluentIcons.arrow_square_up_right_20_regular;
+  static const expense = FluentIcons.arrow_square_down_20_regular;
 
   // nav
   static const arrowRight = FluentIcons.arrow_right_24_regular;
