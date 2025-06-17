@@ -36,12 +36,7 @@ class AddEditCategoryScreen extends StatelessWidget {
             : Text('Add New Category'),
       ),
       body: Padding(
-        padding: const EdgeInsets.only(
-          left: 16,
-          right: 16,
-          top: 16,
-          bottom: 8
-        ),
+        padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 8),
         child: Column(
           children: [
             Expanded(
@@ -69,7 +64,7 @@ class AddEditCategoryScreen extends StatelessWidget {
                           FormBuilderValidators.minLength(3),
                         ]),
                       ),
-                      FormBuilderChoiceChip<dynamic>(
+                      FormBuilderChoiceChips<dynamic>(
                         name: 'type',
                         decoration:
                             const InputDecoration(labelText: 'Category Type'),
@@ -89,7 +84,7 @@ class AddEditCategoryScreen extends StatelessWidget {
                           print(value);
                         },
                       ),
-                      FormBuilderChoiceChip<dynamic>(
+                      FormBuilderChoiceChips<dynamic>(
                         name: 'icon',
                         decoration: const InputDecoration(labelText: 'Icon'),
                         initialValue: _isEdit

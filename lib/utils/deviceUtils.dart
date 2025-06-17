@@ -13,7 +13,7 @@ enum HapticLevel {
 }
 
 class HapticUtil {
-  static vibrate({HapticLevel? level = HapticLevel.tap}) async {
+  static Future<void> vibrate({HapticLevel? level = HapticLevel.tap}) async {
     final supportsHaptic = await Gaimon.canSupportsHaptic;
     if (supportsHaptic) {
       switch (level) {

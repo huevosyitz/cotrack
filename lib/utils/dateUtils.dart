@@ -41,7 +41,6 @@ extension DateUtils on DateTime {
   DateTime subtractYears(int yearsToSubtract) {
     return DateTime(year - yearsToSubtract, month, day);
   }
-  
 
   DateTime addWeeks(int weeksToAdd) {
     return add(Duration(days: weeksToAdd * 7));
@@ -90,8 +89,7 @@ extension DateUtils on DateTime {
     final firstDayOfMonth = DateTime(year, month, 1);
 
     // Calculate the week number for the current date within the month
-    final weekNumber =
-        ((day + firstDayOfMonth.weekday - 2) / 7).floor() + 1;
+    final weekNumber = ((day + firstDayOfMonth.weekday - 2) / 7).floor() + 1;
 
     // Format the result as "yyyy-MMM-Wn"
     return "$year-${DateFormat('MMM').format(this)}-W$weekNumber";
