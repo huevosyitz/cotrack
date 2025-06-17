@@ -8,7 +8,7 @@ import 'package:cotrack/pages/stats/stats_screen.dart';
 import 'package:cotrack/pages/stats/view_models/stats_interval.dart';
 import 'package:cotrack/themes/themes.dart';
 import 'package:cotrack/utils/utils.dart';
-import 'package:cotrack/viewModels/sort_by.dart';
+import 'package:cotrack/core/viewModels/sort_by.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';

@@ -39,16 +39,16 @@ extension DateUtils on DateTime {
   }
 
   DateTime subtractYears(int yearsToSubtract) {
-    return DateTime(this.year - yearsToSubtract, this.month, this.day);
+    return DateTime(year - yearsToSubtract, month, day);
   }
   
 
   DateTime addWeeks(int weeksToAdd) {
-    return this.add(Duration(days: weeksToAdd * 7));
+    return add(Duration(days: weeksToAdd * 7));
   }
 
   DateTime subtractWeeks(int weeksToSubtract) {
-    return this.subtract(Duration(days: weeksToSubtract * 7));
+    return subtract(Duration(days: weeksToSubtract * 7));
   }
 
   String yyyyMM() {
@@ -68,12 +68,12 @@ extension DateUtils on DateTime {
   }
 
   String yyyyWeek() {
-    return "${this.year}-W${this.isoWeekNumber().toString().padLeft(2, '0')}";
+    return "$year-W${isoWeekNumber().toString().padLeft(2, '0')}";
   }
 
   // to first day of month
   DateTime firstDayOfMonth() {
-    return DateTime(this.year, this.month, 1);
+    return DateTime(year, month, 1);
   }
 
   int isoWeekNumber() {
@@ -87,13 +87,13 @@ extension DateUtils on DateTime {
 
   String yearMonthWeek() {
     // Get the first day of the month
-    final firstDayOfMonth = DateTime(this.year, this.month, 1);
+    final firstDayOfMonth = DateTime(year, month, 1);
 
     // Calculate the week number for the current date within the month
     final weekNumber =
-        ((this.day + firstDayOfMonth.weekday - 2) / 7).floor() + 1;
+        ((day + firstDayOfMonth.weekday - 2) / 7).floor() + 1;
 
     // Format the result as "yyyy-MMM-Wn"
-    return "${this.year}-${DateFormat('MMM').format(this)}-W$weekNumber";
+    return "$year-${DateFormat('MMM').format(this)}-W$weekNumber";
   }
 }

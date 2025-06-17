@@ -7,7 +7,7 @@ import 'package:cotrack/pages/calendar/view_models/transaction_list_view_sort_fi
 import 'package:cotrack/pages/stats/add_edit_transaction_modal_screen.dart';
 import 'package:cotrack/themes/themes.dart';
 import 'package:cotrack/utils/utils.dart';
-import 'package:cotrack/viewModels/sort_by.dart';
+import 'package:cotrack/core/viewModels/sort_by.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:watch_it/watch_it.dart';
