@@ -1,6 +1,7 @@
 import 'package:cotrack/core/models/icon_item.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class yIcons {
   yIcons._();
@@ -209,6 +210,31 @@ class yIcons {
     'delete': delete,
     'edit': edit,
     'sort': sort,
+    'UtensilsCrossed': LucideIcons.utensilsCrossed,
+    'ShoppingCart': LucideIcons.shoppingCart,
+    'Bus': LucideIcons.bus,
+    'ParkingSquare': LucideIcons.squareParking,
+    'Droplets': LucideIcons.droplets,
+    'Zap': LucideIcons.zap,
+    'Fuel': LucideIcons.fuel,
+    'Shirt': LucideIcons.shirt,
+    'Gamepad2': LucideIcons.gamepad2,
+    'Gift': LucideIcons.gift,
+    'Wifi': LucideIcons.wifi,
+    'Heart': LucideIcons.heart,
+    'MoreHorizontal': LucideIcons.ellipsis,
+    'ShoppingBag': LucideIcons.shoppingBag,
+    'Plane': LucideIcons.plane,
+    'Car': LucideIcons.car,
+    'Home': LucideIcons.house,
+    'Smartphone': LucideIcons.smartphone,
+    'Pill': LucideIcons.pill,
+    'Coffee': LucideIcons.coffee,
+    'CreditCard': LucideIcons.creditCard,
+    'Banknote': LucideIcons.banknote,
+    'PiggyBank': LucideIcons.piggyBank,
+    'TrendingUp': LucideIcons.trendingUp,
+    'Dumbbell': LucideIcons.dumbbell,
   };
 
   // create a list of IconItem using the iconMap variable
