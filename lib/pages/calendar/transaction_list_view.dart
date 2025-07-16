@@ -114,7 +114,10 @@ class TransactionListView extends StatelessWidget {
                             .transactionCategoriesMap[transaction.category_id]!
                             .name,
                         style: TextStyle(color: yColors.primaryTextFade2))
-                    : Text(transaction.notes!),
+                    : Text(
+                        transaction.notes!,
+                        style: TextStyle(overflow: TextOverflow.ellipsis),
+                      ).pr(8),
                 subtitle: Text(
                   "${TransactionAccountService.transactionAccountsMap[transaction.account_id]?.name ?? "Unknown"} - (${transaction.transaction_date.MMMdd()})",
                   style: context.labelSmall!
