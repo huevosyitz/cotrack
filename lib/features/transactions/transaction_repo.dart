@@ -1,4 +1,4 @@
-import 'package:cotrack/features/transactions/transaction.dart';
+import 'package:cotrack/features/transactions/transaction_entity.dart';
 import 'package:cotrack/utils/extensions.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

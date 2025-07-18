@@ -1,4 +1,4 @@
-import 'package:cotrack/features/transactions/transaction_account.dart';
+import 'package:cotrack/features/accounts/transaction_account.dart';
 
 import 'transaction_account_repo.dart';
 

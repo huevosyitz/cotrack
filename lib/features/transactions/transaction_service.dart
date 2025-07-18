@@ -1,6 +1,6 @@
 import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:cotrack/features/auth/user_service.dart';
-import 'package:cotrack/features/transactions/transaction.dart';
+import 'package:cotrack/features/transactions/transaction_entity.dart';
 import 'package:cotrack/features/transactions/transaction_repo.dart';
 import 'package:cotrack/core/services/services.dart';
 import 'package:intl/intl.dart';

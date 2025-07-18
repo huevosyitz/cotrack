@@ -1,4 +1,4 @@
-import 'package:cotrack/features/transactions/transaction_account.dart';
+import 'package:cotrack/features/accounts/transaction_account.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 final _supaClient = Supabase.instance.client;

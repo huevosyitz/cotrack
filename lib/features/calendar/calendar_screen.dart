@@ -3,13 +3,13 @@ import 'package:calendar_view/calendar_view.dart';
 import 'package:cotrack/features/calendar/daily_transactions_view.dart';
 import 'package:cotrack/features/calendar/monthly_view_comp.dart';
 import 'package:cotrack/features/category/transaction_category_service.dart';
-import 'package:cotrack/features/transactions/transaction.dart';
+import 'package:cotrack/features/transactions/transaction_add_modal_screen.dart';
+import 'package:cotrack/features/transactions/transaction_entity.dart';
 import 'package:cotrack/features/transactions/transaction_service.dart';
 import 'package:cotrack/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
 
-import 'package:cotrack/features/stats/add_edit_transaction_modal_screen.dart';
 import 'package:cotrack/themes/themes.dart';
 
 class CalendarScreen extends StatelessWidget {
@@ -133,7 +133,7 @@ Future<dynamic> openAddTransactionModal(BuildContext context, DateTime date) {
       isScrollControlled: true,
       enableDrag: true,
       context: context,
-      builder: (context) => AddEditTransactionModelScreen(
+      builder: (context) => AddTransactionModelScreen(
             initialTransactionDate: date,
           ));
 }

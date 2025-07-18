@@ -3,7 +3,7 @@ import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:cotrack/features/category/category_action_menu.dart';
 import 'package:cotrack/features/category/transaction_category.dart';
 import 'package:cotrack/features/category/transaction_category_service.dart';
-import 'package:cotrack/features/stats/add_edit_transaction_modal_screen.dart';
+import 'package:cotrack/features/transactions/transaction_add_modal_screen.dart';
 import 'package:cotrack/features/transactions/transaction_type.dart';
 import 'package:cotrack/themes/themes.dart';
 import 'package:cotrack/utils/extensions.dart';
@@ -63,7 +63,7 @@ class HomeScreen extends HookWidget {
                 isScrollControlled: true,
                 enableDrag: true,
                 context: context,
-                builder: (context) => AddEditTransactionModelScreen());
+                builder: (context) => AddTransactionModelScreen());
           },
           child: const Icon(yIcons.add),
         ),

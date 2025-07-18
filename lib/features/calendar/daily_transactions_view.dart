@@ -1,7 +1,7 @@
 import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:cotrack/features/calendar/transaction_list_view.dart';
 import 'package:cotrack/features/category/transaction_category_service.dart';
-import 'package:cotrack/features/transactions/transaction.dart';
+import 'package:cotrack/features/transactions/transaction_entity.dart';
 import 'package:cotrack/features/transactions/transaction_service.dart';
 import 'package:cotrack/themes/themes.dart';
 import 'package:cotrack/utils/utils.dart';

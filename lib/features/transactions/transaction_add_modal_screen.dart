@@ -4,8 +4,8 @@ import 'package:cotrack/features/accounts/transaction_account_service.dart';
 import 'package:cotrack/features/auth/user.dart';
 import 'package:cotrack/features/category/transaction_category.dart';
 import 'package:cotrack/features/category/transaction_category_service.dart';
-import 'package:cotrack/features/transactions/transaction.dart';
-import 'package:cotrack/features/transactions/transaction_account.dart';
+import 'package:cotrack/features/transactions/transaction_entity.dart';
+import 'package:cotrack/features/accounts/transaction_account.dart';
 import 'package:cotrack/features/transactions/transaction_service.dart';
 import 'package:cotrack/features/transactions/transaction_type.dart';
 import 'package:cotrack/themes/extensions.dart';
@@ -19,7 +19,7 @@ import 'package:intl/intl.dart';
 import 'package:cotrack/core/services/services.dart';
 import 'package:watch_it/watch_it.dart';
 
-class AddEditTransactionModelScreen extends WatchingWidget {
+class AddTransactionModelScreen extends WatchingWidget {
   final _formKey = GlobalKey<FormBuilderState>();
   final selectedCategoryType =
       ValueNotifier<TransactionType>(TransactionType.expense);
@@ -32,7 +32,7 @@ class AddEditTransactionModelScreen extends WatchingWidget {
   TransactionCategory? initialCategory;
   final Transaction? transactionToEdit;
 
-  AddEditTransactionModelScreen({
+  AddTransactionModelScreen({
     super.key,
     this.initialTransactionDate,
     this.initialCategory,

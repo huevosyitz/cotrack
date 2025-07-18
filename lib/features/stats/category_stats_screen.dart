@@ -6,7 +6,7 @@ import 'package:cotrack/features/calendar/view_models/transaction_list_view_sort
 import 'package:cotrack/features/category/transaction_category_service.dart';
 import 'package:cotrack/features/stats/stats_screen.dart';
 import 'package:cotrack/features/stats/view_models/stats_interval.dart';
-import 'package:cotrack/features/transactions/transaction.dart';
+import 'package:cotrack/features/transactions/transaction_entity.dart';
 import 'package:cotrack/features/transactions/transaction_service.dart';
 import 'package:cotrack/features/transactions/transaction_type.dart';
 import 'package:cotrack/themes/themes.dart';

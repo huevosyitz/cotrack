@@ -10,13 +10,13 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:watch_it/watch_it.dart';
 
-class AddEditCategoryScreen extends StatelessWidget {
+class AddCategoryScreen extends StatelessWidget {
   final _formKey = GlobalKey<FormBuilderState>();
   final ValueNotifier<bool> _isFormValid = ValueNotifier(false);
   late bool _isEdit = false;
   final TransactionCategory? categoryToEdit;
 
-  AddEditCategoryScreen({super.key, this.categoryToEdit}) {
+  AddCategoryScreen({super.key, this.categoryToEdit}) {
     if (categoryToEdit != null) {
       _formKey.currentState?.patchValue({
         'categoryName': categoryToEdit?.name,

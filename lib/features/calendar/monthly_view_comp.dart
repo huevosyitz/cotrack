@@ -2,7 +2,7 @@ import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:cotrack/core/constants/months.dart';
 import 'package:cotrack/features/category/transaction_category_service.dart';
-import 'package:cotrack/features/transactions/transaction.dart';
+import 'package:cotrack/features/transactions/transaction_entity.dart';
 import 'package:cotrack/features/transactions/transaction_service.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
