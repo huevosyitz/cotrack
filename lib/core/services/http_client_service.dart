@@ -1,5 +1,5 @@
 import 'package:cotrack/config/app_config.dart';
-import 'package:cotrack/core/services/authentication_header_interceptor.dart';
+import 'package:cotrack/features/auth/auth.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:watch_it/watch_it.dart';

@@ -1,4 +1,4 @@
-import 'package:cotrack/core/models/user.dart';
+import 'package:cotrack/features/auth/user.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

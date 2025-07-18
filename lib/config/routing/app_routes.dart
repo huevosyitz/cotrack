@@ -2,7 +2,13 @@
 import 'dart:async';
 
 import 'package:cotrack/config/routing/app_shell.dart';
-import 'package:cotrack/pages/pages.dart';
+import 'package:cotrack/features/accounts/accounts_screen.dart';
+import 'package:cotrack/features/auth/login_screen.dart';
+import 'package:cotrack/features/calendar/calendar_screen.dart';
+import 'package:cotrack/features/home/home_screen.dart';
+import 'package:cotrack/features/notifications.dart';
+import 'package:cotrack/features/settings/settings_screen.dart';
+import 'package:cotrack/features/stats/stats_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

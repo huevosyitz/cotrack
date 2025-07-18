@@ -2,7 +2,8 @@ import 'dart:io';
 
 import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:cached_storage/cached_storage.dart';
-import 'package:cotrack/core/services/services.dart';
+import 'package:cotrack/features/accounts/transaction_account_service.dart';
+import 'package:cotrack/features/category/transaction_category_service.dart';
 import 'package:watch_it/watch_it.dart';
 
 class DataInit {

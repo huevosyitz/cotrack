@@ -1,4 +1,4 @@
-import 'package:cotrack/core/services/user_service.dart';
+import 'package:cotrack/features/auth/user_service.dart';
 import 'package:cotrack/core/state/app_state.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:watch_it/watch_it.dart';

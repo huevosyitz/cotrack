@@ -1,6 +1,11 @@
-import "package:cotrack/core/repo/repo.dart";
-import "package:cotrack/core/services/services.dart";
 import "package:cotrack/core/state/app_state.dart";
+import "package:cotrack/features/accounts/transaction_account_repo.dart";
+import "package:cotrack/features/accounts/transaction_account_service.dart";
+import "package:cotrack/features/auth/auth.dart";
+import "package:cotrack/features/category/transaction_category_repo.dart";
+import "package:cotrack/features/category/transaction_category_service.dart";
+import "package:cotrack/features/transactions/transaction_repo.dart";
+import "package:cotrack/features/transactions/transaction_service.dart";
 import "package:watch_it/watch_it.dart";
 
 class Registrations {
