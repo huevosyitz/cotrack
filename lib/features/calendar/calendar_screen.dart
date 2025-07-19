@@ -1,5 +1,6 @@
 import 'package:cached_query_flutter/cached_query_flutter.dart';
 import 'package:calendar_view/calendar_view.dart';
+import 'package:cotrack/core/services/logger.dart';
 import 'package:cotrack/features/calendar/daily_transactions_view.dart';
 import 'package:cotrack/features/calendar/monthly_view_comp.dart';
 import 'package:cotrack/features/category/transaction_category_service.dart';
@@ -34,44 +35,93 @@ class CalendarScreen extends StatelessWidget {
     });
   }
 
+  List<Transaction> getTransactionForDate(DateTime date) {
+    return transactionService
+            .getAllMyTransactionsQuery()
+            .state
+            .data
+            ?.where((t) => t.transaction_date.isSameDayAs(date))
+            .toList() ??
+        [];
+  }
+
   void refreshCalendarData(QueryState<List<Transaction>> state) {
     final transactions = state.data as List<Transaction>;
-    final existingEvents = eventController.allEvents;
 
-    // Build lookup maps for quick ID access
-    final existingMap = {
-      for (var e in existingEvents) (e.event as Transaction).id: e
-    };
-    final transactionMap = {for (var t in transactions) t.id: t};
+    eventController.removeWhere((a) => true);
 
-    // Remove events no longer in transactions
-    final toRemove = existingEvents
-        .where((e) => !transactionMap.containsKey((e.event as Transaction).id))
-        .toList();
-    eventController.removeAll(toRemove);
+    var toAdd = <CalendarEventData>[];
 
-    // Add new events
-    final toAdd = transactions
-        .where((t) => !existingMap.containsKey(t.id))
-        .map(_toCalendarEvent)
-        .toList();
-    eventController.addAll(toAdd);
+    var getDistinctDates = transactions
+        .map((e) => e.transaction_date.yyyyMMdd())
+        .toSet()
+        .map((e) => DateTime.parse(e))
+        .toList()
+      ..sort((a, b) => a.compareTo(b));
 
-    // Update changed events
-    for (var existingEvent in existingEvents) {
-      final oldTran = existingEvent.event as Transaction;
-      final newTran = transactionMap[oldTran.id];
-      if (newTran != null && oldTran.updated_at != newTran.updated_at) {
-        eventController.update(existingEvent, _toCalendarEvent(newTran));
+    // for each distinct day, add a dummy transaction with one expenseAmount and one incomeAmount
+    for (var date in getDistinctDates) {
+      var transactionsForDate = transactions
+          .where((t) => t.transaction_date.isSameDayAs(date))
+          .toList();
+
+      final expenseAmount = transactionsForDate
+          .where((e) => categoryService.isExpenseCategory(e.category_id))
+          .map((e) => e.amount)
+          .fold(0.0, (value, element) => value + element);
+
+      final incomeAmount = transactionsForDate
+          .where((e) => categoryService.isIncomeCategory(e.category_id))
+          .map((e) => e.amount)
+          .fold(0.0, (value, element) => value + element);
+
+      if (expenseAmount > 0) {
+        // Create a dummy transaction for the date
+        final dummyTransaction = Transaction(
+          id: "dummy-${date.toIso8601String()}",
+          amount: expenseAmount,
+          category_id: TransactionCategoryService
+              .expenseCategories.first.id, // dummy category
+          transaction_date: date,
+          updated_at: date,
+          created_at: date,
+          account_id: 1,
+          created_by: "user",
+          notes: "Dummy transaction for $date",
+          group_id: 1,
+          updated_by: "user",
+        );
+        toAdd.add(_toCalendarEvent(dummyTransaction));
+      }
+
+      if (incomeAmount > 0) {
+        final dummyTransaction = Transaction(
+          id: "dummy-${date.toIso8601String()}",
+          amount: incomeAmount,
+          category_id: TransactionCategoryService
+              .incomeCategories.first.id, // dummy category
+          transaction_date: date,
+          updated_at: date,
+          created_at: date,
+          account_id: 1,
+          created_by: "user",
+          notes: "Dummy transaction for $date",
+          group_id: 1,
+          updated_by: "user",
+        );
+        toAdd.add(_toCalendarEvent(dummyTransaction));
       }
     }
+    eventController.addAll(toAdd);
 
+    refreshSelectedDateTransactions();
+  }
+
+  void refreshSelectedDateTransactions() {
     var (selectedDate, selectedTrans) = selectedDateTransactions.value;
     final today = selectedDate ?? DateTime.now();
     // get transactions for the selected date
-    final filteredTransactions = transactions
-        .where((t) => t.transaction_date.isSameDayAs(today))
-        .toList();
+    final filteredTransactions = getTransactionForDate(today);
 
     selectedDateTransactions.value = (today, filteredTransactions);
   }
@@ -98,10 +148,13 @@ class CalendarScreen extends StatelessWidget {
             child: MonthlyCalendarView(
               eventController: eventController,
               onDoubleTap: (date) {
+                var txForDay = getTransactionForDate(date);
+                selectedDateTransactions.value = (date, txForDay);
                 openAddTransactionModal(context, date);
               },
               onTap: (date, transactions) {
-                selectedDateTransactions.value = (date, transactions);
+                var txForDay = getTransactionForDate(date);
+                selectedDateTransactions.value = (date, txForDay);
               },
             ),
           ),

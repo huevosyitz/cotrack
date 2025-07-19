@@ -1,6 +1,7 @@
 import 'package:awesome_extensions/awesome_extensions.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:cotrack/core/constants/months.dart';
+import 'package:cotrack/core/services/logger.dart';
 import 'package:cotrack/features/category/transaction_category_service.dart';
 import 'package:cotrack/features/transactions/transaction_entity.dart';
 import 'package:cotrack/features/transactions/transaction_service.dart';
@@ -50,7 +51,10 @@ class MonthlyCalendarView extends StatelessWidget {
             .fold(0.0, (value, element) => value + element);
 
         return GestureDetector(
-          onDoubleTap: () => onDoubleTap?.call(date),
+          onDoubleTap: () {
+            selectedDate.value = date;
+            onDoubleTap?.call(date);
+          },
           onTap: () {
             selectedDate.value = date;
             onTap?.call(
