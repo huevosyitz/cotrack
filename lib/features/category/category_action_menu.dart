@@ -1,4 +1,3 @@
-import 'package:cotrack/components/components.dart';
 import 'package:cotrack/features/category/category_add_screen.dart';
 import 'package:cotrack/features/category/category_icon_avatar.dart';
 import 'package:cotrack/features/category/transaction_category.dart';
